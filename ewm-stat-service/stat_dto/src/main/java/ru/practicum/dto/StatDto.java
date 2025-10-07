@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 public class StatDto {
+    private Long id;
     @NotBlank(groups = Validation.Create.class)
     private String app;
     @NotBlank(groups = Validation.Create.class)
