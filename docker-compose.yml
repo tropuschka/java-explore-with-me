@@ -14,9 +14,9 @@ services:
     depends_on:
       - stats_service-db
     environment:
-      - STAT_URL_DB=jdbc:postgresql://state_server-db:5432/stat_db
-      - STAT_USERNAME_DB=asd
-      - STAT_PASSWORD_DB=123
+      - STAT_URL_DB=jdbc:postgresql://localhost:5432/stat_db
+      - STAT_USERNAME_DB=postgres
+      - STAT_PASSWORD_DB=1234
 
 
   stats_service-db:
@@ -26,8 +26,8 @@ services:
       - "6666:5432"
     environment:
       - POSTGRES_DB=stat_db
-      - POSTGRES_USER=asd
-      - POSTGRES_PASSWORD=123
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
 
 
   ewm-service:
@@ -45,7 +45,7 @@ services:
     environment:
       - MAIN_DB=jdbc:postgresql://postgres-main-db:5432/ewm_db
       - MAIN_USER=postgres
-      - MAIN_PASSWORD=123
+      - MAIN_PASSWORD=1234
 
   ewm-db:
     image: postgres:15
@@ -55,4 +55,4 @@ services:
     environment:
       - POSTGRES_DB=ewm_db
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=123
+      - POSTGRES_PASSWORD=1234
