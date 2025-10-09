@@ -8,7 +8,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.dto.ResponseStatDto;
 import ru.practicum.dto.StatDto;
-import main.java.ru.practicum.client.BaseClient;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
