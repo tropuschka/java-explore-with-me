@@ -1,4 +1,4 @@
-package main.java.ru.practicum.client;
+package ru.practicum.client;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -7,6 +7,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.dto.StatDto;
+import main.java.ru.practicum.client.BaseClient;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
