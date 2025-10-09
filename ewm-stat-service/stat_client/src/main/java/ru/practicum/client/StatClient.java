@@ -1,50 +1,46 @@
-package main.java.ru.practicum.client;
+package ru.practicum.client;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Service;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
+import ru.practicum.dto.ResponseStatDto;
 import ru.practicum.dto.StatDto;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
-@Service
-public class StatClient extends BaseClient {
+@Component
+public class StatClient {
 
+    private final String path = "http://localhost:9090";
+    private final RestTemplate restTemplate;
 
-    public StatClient(RestTemplateBuilder builder, @Value("${shareit-server.url:http://localhost:9090}") String serverUrl) {
-        super(
-                builder
-                        .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
-                        .build()
-        );
+    public StatClient() {
+        this.restTemplate = new RestTemplateBuilder()
+                .uriTemplateHandler(new DefaultUriBuilderFactory(path))
+                .requestFactory(() -> new HttpComponentsClientHttpRequestFactory())
+                .build();
     }
 
-    public ResponseEntity<Object> addStatEvent(StatDto stat) {
-        return post("/hit", stat);
+    public void saveStat(StatDto statDto) {
+        restTemplate.postForLocation(path + "/hit", statDto);
     }
 
-    public ResponseEntity<Object> readStatEvent(String start, String end, @Nullable List<String> uris, boolean unique) {
-        Map<String, Object> parameters;
-        if (uris == null) {
-            parameters = Map.of("start", encode(start),
-                    "end", encode(end),
-                    "unique", unique);
-            return get("/stats?start={start}&end={end}&unique={unique}", parameters);
-        }
-        parameters = Map.of("start", start,
-                "end", end,
-                "uris", String.join(",", uris),
-                "unique", unique);
-        return get("/stats?start={start}&end={end}&unique={unique}&uris={uris}", parameters);
-    }
+    public List<ResponseStatDto> getViewStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
+        String formattedStart = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(start);
+        String formattedEnd = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(end);
 
-    private String encode(String value) {
-        return URLEncoder.encode(value, StandardCharsets.UTF_8);
+        ResponseEntity<ResponseStatDto[]> responseResult = restTemplate.getForEntity(
+                path + "/stats" + "?start=" + formattedStart + "&end=" + formattedEnd +
+                        "&uris=" + String.join(",", uris) + "&unique=" + unique,
+                ResponseStatDto[].class);
+
+        return Arrays.asList(Objects.requireNonNull(responseResult.getBody()));
     }
 }
