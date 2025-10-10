@@ -2,6 +2,7 @@ package ru.practicum.controller;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import ru.practicum.service.StatServerService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -16,11 +17,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@AllArgsConstructor
 @Validated
 public class StatServerController {
-    private StatServerService statServerService;
+    private final StatServerService statServerService;
     private static final String timeFormat = "yyyy-MM-dd HH:mm:ss";
+
+    @Autowired
+    public StatServerController(StatServerService statServerService) {
+        this.statServerService = statServerService;
+    }
 
     @PostMapping("/hit")
     @Validated({Validation.Create.class})
