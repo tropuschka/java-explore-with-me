@@ -1,4 +1,4 @@
-package main.java.ru.practicum.exceptions;
+package ru.practicum.exceptions;
 
 public class ConditionsNotMetException extends RuntimeException {
     public ConditionsNotMetException(String message) {

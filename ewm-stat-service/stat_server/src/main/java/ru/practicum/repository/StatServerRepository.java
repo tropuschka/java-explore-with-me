@@ -1,6 +1,6 @@
-package main.java.ru.practicum.repository;
+package ru.practicum.repository;
 
-import main.java.ru.practicum.model.Stat;
+import ru.practicum.model.Stat;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.dto.ResponseStatDto;

@@ -1,9 +1,9 @@
-package main.java.ru.practicum.service;
+package ru.practicum.service;
 
 import lombok.RequiredArgsConstructor;
-import main.java.ru.practicum.mapping.StatMapper;
-import main.java.ru.practicum.model.Stat;
-import main.java.ru.practicum.repository.StatServerRepository;
+import ru.practicum.mapping.StatMapper;
+import ru.practicum.model.Stat;
+import ru.practicum.repository.StatServerRepository;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.ResponseStatDto;
 import ru.practicum.dto.StatDto;

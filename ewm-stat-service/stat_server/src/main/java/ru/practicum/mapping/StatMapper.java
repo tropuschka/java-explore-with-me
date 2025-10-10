@@ -1,6 +1,6 @@
-package main.java.ru.practicum.mapping;
+package ru.practicum.mapping;
 
-import main.java.ru.practicum.model.Stat;
+import ru.practicum.model.Stat;
 import ru.practicum.dto.StatDto;
 
 public class StatMapper {

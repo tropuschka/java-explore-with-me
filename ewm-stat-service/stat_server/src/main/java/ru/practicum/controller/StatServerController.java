@@ -1,8 +1,8 @@
-package main.java.ru.practicum.controller;
+package ru.practicum.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import main.java.ru.practicum.service.StatServerService;
+import ru.practicum.service.StatServerService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

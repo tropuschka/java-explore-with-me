@@ -1,4 +1,4 @@
-package main.java.ru.practicum.service;
+package ru.practicum.service;
 
 import ru.practicum.dto.ResponseStatDto;
 import ru.practicum.dto.StatDto;
