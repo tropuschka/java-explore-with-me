@@ -21,6 +21,6 @@ public class Stat {
     private String uri;
     @Column(name = "ip", nullable = false)
     private String ip;
-    @Column(name = "timestamp", nullable = false)
+    @Column(name = "time_stamp", nullable = false)
     private LocalDateTime timestamp;
 }
