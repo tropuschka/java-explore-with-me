@@ -9,37 +9,23 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface StatServerRepository extends JpaRepository<Stat, Long> {
-    @Query("select new ru.practicum.dto.StatResponseDto(stat.api, stat.uri, count(distinct stat.ip)) " +
+    @Query("select new ru.practicum.dto.ResponseStatDto(stat.app, stat.uri, count(distinct stat.ip)) " +
             "from Stat as stat " +
-            "where stat.timestamp between ?1 and ?2 " +
-            "group by stat.api, stat.uri " +
+            "where stat.timestamp between :start and :end " +
+            "and (:uris is null or stat.uri in :uris) " +
+            "group by stat.app, stat.uri " +
             "order by count(distinct stat.ip) desc")
-    List<ResponseStatDto> findAllByTimestampBetweenStartAndEndWhereIpIsUnique(LocalDateTime start, LocalDateTime end);
-
-    @Query("select new ru.practicum.dto.StatResponseDto(stat.api, stat.uri, count(stat.ip)) " +
-            "from Stat as stat " +
-            "where stat.timestamp between ?1 and ?2 " +
-            "group by stat.api, stat.uri " +
-            "order by count(stat.ip) desc")
-    List<ResponseStatDto> findAllByTimestampBetweenStartAndEnd(LocalDateTime start, LocalDateTime end);
-
-    @Query("select new ru.practicum.dto.StatResponseDto(stat.api, stat.uri, count(distinct stat.ip)) " +
-            "from Stat as stat " +
-            "where stat.timestamp between ?1 and ?2 " +
-            "and stat.uri in ?3 " +
-            "group by stat.api, stat.uri " +
-            "order by count(distinct stat.ip) desc")
-    List<ResponseStatDto> findAllByTimestampBetweenStartAndEndWhereIpIsUniqueAndUriIn(LocalDateTime start,
+    List<ResponseStatDto> findAllByTimestampBetweenStartAndEndWhereIpIsUnique(LocalDateTime start,
                                                                                       LocalDateTime end,
                                                                                       List<String> uris);
 
-    @Query("select new ru.practicum.dto.StatResponseDto(stat.api, stat.uri, count(stat.ip)) " +
+    @Query("select new ru.practicum.dto.ResponseStatDto(stat.app, stat.uri, count(stat.ip)) " +
             "from Stat as stat " +
-            "where stat.timestamp between ?1 and ?2 " +
-            "and stat.uri in ?3 " +
-            "group by stat.api, stat.uri " +
+            "where stat.timestamp between :start and :end " +
+            "and (:uris is null or stat.uri in :uris) " +
+            "group by stat.app, stat.uri " +
             "order by count(stat.ip) desc")
-    List<ResponseStatDto> findAllByTimestampBetweenStartAndEndWhereUriIn(LocalDateTime start,
+    List<ResponseStatDto> findAllByTimestampBetweenStartAndEnd(LocalDateTime start,
                                                                                       LocalDateTime end,
                                                                                       List<String> uris);
 }

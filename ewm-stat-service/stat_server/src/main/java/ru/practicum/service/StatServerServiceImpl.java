@@ -27,19 +27,10 @@ public class StatServerServiceImpl implements StatServerService {
         if (start.isAfter(end)) {
             throw new ClassCastException("Начало периода должно быть до его конца");
         }
-
-        if (uris.isEmpty()) {
-            if (unique) {
-                return statServerRepository.findAllByTimestampBetweenStartAndEndWhereIpIsUnique(start, end);
-            } else {
-                return statServerRepository.findAllByTimestampBetweenStartAndEnd(start, end);
-            }
+        if (unique) {
+            return statServerRepository.findAllByTimestampBetweenStartAndEndWhereIpIsUnique(start, end, uris);
         } else {
-            if (unique) {
-                return statServerRepository.findAllByTimestampBetweenStartAndEndWhereIpIsUniqueAndUriIn(start, end, uris);
-            } else {
-                return statServerRepository.findAllByTimestampBetweenStartAndEndWhereUriIn(start, end, uris);
-            }
+            return statServerRepository.findAllByTimestampBetweenStartAndEnd(start, end, uris);
         }
     }
 }
