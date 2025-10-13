@@ -32,7 +32,8 @@ public class StatClient {
         restTemplate.postForLocation(path + "/hit", statDto);
     }
 
-    public List<ResponseStatDto> getViewStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
+    public List<ResponseStatDto> getViewStats(LocalDateTime start, LocalDateTime end,
+                                              List<String> uris, Boolean unique) {
         String formattedStart = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(start);
         String formattedEnd = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(end);
 

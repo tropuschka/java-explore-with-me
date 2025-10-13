@@ -35,7 +35,7 @@ public class StatServerController {
 
     @GetMapping("/stats")
     public ResponseEntity<List<ResponseStatDto>> getStat(
-            @RequestParam @DateTimeFormat(pattern = timeFormat)LocalDateTime start,
+            @RequestParam @DateTimeFormat(pattern = timeFormat) LocalDateTime start,
             @RequestParam @DateTimeFormat(pattern = timeFormat) LocalDateTime end,
             @RequestParam(defaultValue = "") List<String> uris,
             @RequestParam(defaultValue = "false") boolean unique) {
