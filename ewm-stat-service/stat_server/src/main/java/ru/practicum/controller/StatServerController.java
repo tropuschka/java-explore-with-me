@@ -1,7 +1,6 @@
 package ru.practicum.controller;
 
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.practicum.service.StatServerService;
 import org.springframework.format.annotation.DateTimeFormat;
