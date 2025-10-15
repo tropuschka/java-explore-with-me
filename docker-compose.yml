@@ -23,7 +23,7 @@ services:
     image: postgres:15-alpine
     container_name: stat_server-db
     ports:
-      - "6666:5432"
+      - "5432:5432"
     environment:
       - POSTGRES_DB=stat_db
       - POSTGRES_USER=postgres
