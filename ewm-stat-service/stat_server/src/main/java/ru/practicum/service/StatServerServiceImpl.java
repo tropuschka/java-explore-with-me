@@ -29,8 +29,10 @@ public class StatServerServiceImpl implements StatServerService {
         }
         if (unique) {
             return statServerRepository.findAllByTimestampBetweenStartAndEndWhereIpIsUnique(start, end, uris);
+        } else if (uris.isEmpty()) {
+            return statServerRepository.findAllByTimestampBetweenStartAndEndWithoutUris(start, end);
         } else {
-            return statServerRepository.findAllByTimestampBetweenStartAndEnd(start, end, uris);
+            return statServerRepository.findAllByTimestampBetweenStartAndEndWithUris(start, end, uris);
         }
     }
 }

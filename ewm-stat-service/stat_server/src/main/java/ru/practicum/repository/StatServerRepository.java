@@ -22,10 +22,18 @@ public interface StatServerRepository extends JpaRepository<Stat, Long> {
     @Query("select new ru.practicum.dto.ResponseStatDto(stat.app, stat.uri, count(stat.ip)) " +
             "from Stat as stat " +
             "where stat.timestamp between :start and :end " +
-            "and (:uris is null or stat.uri in :uris) " +
+            "and stat.uri in :uris " +
             "group by stat.app, stat.uri " +
             "order by count(stat.ip) desc")
-    List<ResponseStatDto> findAllByTimestampBetweenStartAndEnd(LocalDateTime start,
+    List<ResponseStatDto> findAllByTimestampBetweenStartAndEndWithUris(LocalDateTime start,
                                                                                       LocalDateTime end,
                                                                                       List<String> uris);
+
+    @Query("select new ru.practicum.dto.ResponseStatDto(stat.app, stat.uri, count(stat.ip)) " +
+            "from Stat as stat " +
+            "where stat.timestamp between :start and :end " +
+            "group by stat.app, stat.uri " +
+            "order by count(stat.ip) desc")
+    List<ResponseStatDto> findAllByTimestampBetweenStartAndEndWithoutUris(LocalDateTime start,
+                                                                       LocalDateTime end);
 }
