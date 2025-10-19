@@ -1,6 +1,7 @@
 package ru.practicum.service;
 
 import lombok.RequiredArgsConstructor;
+import ru.practicum.exceptions.ConditionsNotMetException;
 import ru.practicum.mapping.StatMapper;
 import ru.practicum.model.Stat;
 import ru.practicum.repository.StatServerRepository;
@@ -25,7 +26,7 @@ public class StatServerServiceImpl implements StatServerService {
     @Override
     public List<ResponseStatDto> getStat(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
         if (start.isAfter(end)) {
-            throw new ClassCastException("Начало периода должно быть до его конца");
+            throw new ConditionsNotMetException("Начало периода должно быть до его конца");
         }
         if (unique) {
             return statServerRepository.findAllByTimestampBetweenStartAndEndWhereIpIsUnique(start, end, uris);

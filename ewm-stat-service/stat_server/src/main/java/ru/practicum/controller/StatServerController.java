@@ -10,7 +10,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.ResponseStatDto;
 import ru.practicum.dto.StatDto;
-import ru.practicum.validation.Validation;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,7 +26,7 @@ public class StatServerController {
     }
 
     @PostMapping("/hit")
-    @Validated({Validation.Create.class})
+    @Validated
     public ResponseEntity<StatDto> addStat(@RequestBody @Valid StatDto statDto) {
         return new ResponseEntity<>(statServerService.add(statDto), HttpStatus.CREATED);
     }

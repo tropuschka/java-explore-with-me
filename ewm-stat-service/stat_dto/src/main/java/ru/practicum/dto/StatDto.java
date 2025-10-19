@@ -4,19 +4,17 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import ru.practicum.validation.Validation;
 
 @Data
 @AllArgsConstructor
 public class StatDto {
     private Long id;
-    @NotBlank(groups = Validation.Create.class)
+    @NotBlank
     private String app;
-    @NotBlank(groups = Validation.Create.class)
+    @NotBlank
     private String uri;
-    @NotBlank(groups = Validation.Create.class)
+    @NotBlank
     private String ip;
-    @NotNull(groups = Validation.Create.class)
-//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @NotNull
     private String timestamp;
 }

@@ -1,5 +1,6 @@
 package ru.practicum.client;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -18,8 +19,10 @@ import java.util.Objects;
 @Component
 public class StatClient {
 
-    private final String path = "http://localhost:9090";
+    @Value("${stats-service.url}")
+    private String path;
     private final RestTemplate restTemplate;
+    private final static String timeFormat = "yyyy-MM-dd HH:mm:ss";
 
     public StatClient() {
         this.restTemplate = new RestTemplateBuilder()
@@ -34,8 +37,8 @@ public class StatClient {
 
     public List<ResponseStatDto> getViewStats(LocalDateTime start, LocalDateTime end,
                                               List<String> uris, Boolean unique) {
-        String formattedStart = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(start);
-        String formattedEnd = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(end);
+        String formattedStart = DateTimeFormatter.ofPattern(timeFormat).format(start);
+        String formattedEnd = DateTimeFormatter.ofPattern(timeFormat).format(end);
 
         ResponseEntity<ResponseStatDto[]> responseResult = restTemplate.getForEntity(
                 path + "/stats" + "?start=" + formattedStart + "&end=" + formattedEnd +
