@@ -22,7 +22,7 @@ public class StatClient {
     @Value("${stats-service.url}")
     private String path;
     private final RestTemplate restTemplate;
-    private final static String timeFormat = "yyyy-MM-dd HH:mm:ss";
+    private static final String timeFormat = "yyyy-MM-dd HH:mm:ss";
 
     public StatClient() {
         this.restTemplate = new RestTemplateBuilder()
