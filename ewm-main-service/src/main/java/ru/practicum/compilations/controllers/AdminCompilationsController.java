@@ -5,9 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.practicum.compilations.dto.CompilationDto;
 import ru.practicum.compilations.dto.NewCompilationDto;
 import ru.practicum.compilations.service.CompilationService;
@@ -27,5 +25,10 @@ public class AdminCompilationsController {
     @Validated
     public ResponseEntity<CompilationDto> addCompilation(@Valid NewCompilationDto newCompilationDto) {
         return new ResponseEntity<>(compilationService.addCompilation(newCompilationDto), HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/{compId}")
+    public void deleteCompilation(@PathVariable Long compId) {
+        compilationService.deleteCompilation(compId);
     }
 }

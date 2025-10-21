@@ -13,6 +13,7 @@ import ru.practicum.exceptions.NotFoundException;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,5 +35,12 @@ public class CompilationServiceImpl implements CompilationService {
 
         Compilation saved = compilationRepository.save(compilation);
         return CompilationMapper.toDto(saved);
+    }
+
+    @Override
+    public void deleteCompilation(Long compilationId) {
+        Optional<Compilation> check = compilationRepository.findById(compilationId);
+        if (check.isPresent()) compilationRepository.deleteById(compilationId);
+        else throw new NotFoundException("Подборка не найдена");
     }
 }
