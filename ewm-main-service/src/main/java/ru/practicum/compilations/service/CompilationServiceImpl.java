@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.compilations.dto.CompilationDto;
 import ru.practicum.compilations.dto.NewCompilationDto;
+import ru.practicum.compilations.dto.UpdateCompilationRequest;
 import ru.practicum.compilations.mapping.CompilationMapper;
 import ru.practicum.compilations.model.Compilation;
 import ru.practicum.compilations.repository.CompilationRepository;
@@ -14,6 +15,7 @@ import ru.practicum.exceptions.NotFoundException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -26,10 +28,7 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation compilation = CompilationMapper.toCompilation(newCompilationDto);
 
         if (newCompilationDto.getEvents() != null && !newCompilationDto.getEvents().isEmpty()) {
-            List<Event> compilationEvents = eventRepository.findAllById(newCompilationDto.getEvents());
-            if (compilationEvents.size() != newCompilationDto.getEvents().size()) {
-                throw new NotFoundException("Найдены не все события");
-            }
+            List<Event> compilationEvents = checkEvents(newCompilationDto.getEvents());
             compilation.setEvents(new HashSet<>(compilationEvents));
         } else compilation.setEvents(new HashSet<>());
 
@@ -39,8 +38,34 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public void deleteCompilation(Long compilationId) {
-        Optional<Compilation> check = compilationRepository.findById(compilationId);
-        if (check.isPresent()) compilationRepository.deleteById(compilationId);
+        findCompilation(compilationId);
+        compilationRepository.deleteById(compilationId);
+    }
+
+    @Override
+    public CompilationDto updateCompilation(Long id, UpdateCompilationRequest request) {
+        Compilation compilation = findCompilation(id);
+        if (request.getEvents() != null) {
+            List<Event> compilationEvents = checkEvents(request.getEvents());
+            compilation.setEvents(new HashSet<>(compilationEvents));
+        }
+        if (request.getPinned() != null) compilation.setPinned(request.getPinned());
+        if (request.getTitle() != null) compilation.setTitle(request.getTitle());
+        Compilation saved = compilationRepository.save(compilation);
+        return CompilationMapper.toDto(saved);
+    }
+
+    private Compilation findCompilation(Long id) {
+        Optional<Compilation> check = compilationRepository.findById(id);
+        if (check.isPresent()) return check.get();
         else throw new NotFoundException("Подборка не найдена");
+    }
+
+    private List<Event> checkEvents(Set<Long> events) {
+        List<Event> compilationEvents = eventRepository.findAllById(events);
+        if (compilationEvents.size() != events.size()) {
+            throw new NotFoundException("Найдены не все события");
+        }
+        return compilationEvents;
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.compilations.dto.CompilationDto;
 import ru.practicum.compilations.dto.NewCompilationDto;
+import ru.practicum.compilations.dto.UpdateCompilationRequest;
 import ru.practicum.compilations.service.CompilationService;
 
 @RestController
@@ -23,12 +24,18 @@ public class AdminCompilationsController {
 
     @PostMapping
     @Validated
-    public ResponseEntity<CompilationDto> addCompilation(@Valid NewCompilationDto newCompilationDto) {
+    public ResponseEntity<CompilationDto> addCompilation(@Valid @RequestBody NewCompilationDto newCompilationDto) {
         return new ResponseEntity<>(compilationService.addCompilation(newCompilationDto), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{compId}")
     public void deleteCompilation(@PathVariable Long compId) {
         compilationService.deleteCompilation(compId);
+    }
+
+    @PatchMapping("/compId")
+    public ResponseEntity<CompilationDto> updateCompilation(@PathVariable Long compId,
+                                                            @RequestBody UpdateCompilationRequest updateCompilation) {
+        return new ResponseEntity<>(compilationService.updateCompilation(compId, updateCompilation), HttpStatus.OK);
     }
 }
