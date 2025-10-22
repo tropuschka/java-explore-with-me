@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.events.dto.EventFullDto;
 import ru.practicum.events.dto.EventShortDto;
 import ru.practicum.events.service.EventService;
-import ru.practicum.events.model.Event;
 
 import java.util.List;
 
@@ -17,7 +16,7 @@ import java.util.List;
 @RequestMapping("/events")
 @Validated
 public class EventController {
-    public final EventService eventService;
+    private final EventService eventService;
 
     @Autowired
     public EventController(EventService eventService) {

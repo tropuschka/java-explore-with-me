@@ -10,6 +10,7 @@ import ru.practicum.events.mapping.EventMapper;
 import ru.practicum.events.model.Event;
 import ru.practicum.events.repository.EventRepository;
 import ru.practicum.events.status.EventSort;
+import ru.practicum.events.status.EventState;
 import ru.practicum.exceptions.ConditionsNotMetException;
 import ru.practicum.client.StatClient;
 import ru.practicum.exceptions.NotFoundException;
@@ -32,26 +33,10 @@ public class EventServiceImpl implements EventService {
     public List<EventShortDto> search(String text, List<Long> categories, Boolean paid, String rangeStart,
                                       String rangeEnd, boolean onlyAvailable, String sort, int from, int size,
                                       HttpServletRequest httpServletRequest) {
-        LocalDateTime searchStart = null;
-        LocalDateTime searchEnd = null;
-        if (rangeStart == null && rangeEnd == null) {
-            searchStart = LocalDateTime.now();
-        }
-        if (rangeStart != null) searchStart = LocalDateTime.parse(rangeStart, formatter);
-        if (rangeEnd != null) searchEnd = LocalDateTime.parse(rangeEnd, formatter);
-
-        Page<Event> searchEvent;
-        if (searchStart != null && searchEnd != null) {
-            searchEvent = eventRepository.findAllAndEventDateIsAfterAndEventDateIsBefore(searchStart, searchEnd);
-        } else if (searchStart != null) {
-            searchEvent = eventRepository.findAllAndEventDateIsAfter(searchStart);
-        } else {
-            searchEvent = eventRepository.findAllAndEventDateIsBefore(searchEnd);
-        }
+        List<Event> events = search(rangeStart, rangeEnd);
 
         // Вероятно, все эти проверки можно было засунуть в репозиторий,
         // но, думаю, вышло бы больше методов, чем если использовать много стримов ㅠㅠ
-        List<Event> events = searchEvent.stream().toList();
         if (text != null && !text.isBlank()) {
             text = text.toLowerCase();
             String finalText = text;
@@ -109,9 +94,60 @@ public class EventServiceImpl implements EventService {
         return EventMapper.toFullDto(event);
     }
 
+    @Override
+    public List<EventFullDto> adminSearch(List<Long> users, List<String> states, List<Long> categories,
+                                          String rangeStart, String rangeEnd, int from, int size) {
+        List<Event> events = search(rangeStart, rangeEnd);
+
+        if (users != null && !users.isEmpty()) {
+            events = events.stream()
+                    .filter(e -> users.contains(e.getInitiator().getId()))
+                    .toList();
+        }
+        if (states != null && !states.isEmpty()) {
+            List<EventState> statesEnum = states.stream().map(String::toUpperCase).map(EventState::valueOf).toList();
+            events = events.stream()
+                    .filter(e -> statesEnum.contains(e.getState()))
+                    .toList();
+        }
+        if (categories != null && !categories.isEmpty()) {
+            events = events.stream()
+                    .filter(e -> e.getCategory() != null)
+                    .filter(e -> categories.contains(e.getCategory().getId()))
+                    .toList();
+        }
+
+        List<EventFullDto> searchList = new ArrayList<>();
+        for (int i = from; i < from + size; i++) {
+            searchList.add(EventMapper.toFullDto(events.get(i)));
+        }
+        return searchList;
+    }
+
     private Event searchEvent(Long eventId) {
         Optional<Event> event = eventRepository.findById(eventId);
         if (event.isEmpty()) throw new NotFoundException("Событие не найдено");
         return event.get();
+    }
+
+    private List<Event> search(String rangeStart, String rangeEnd) {
+        LocalDateTime searchStart = null;
+        LocalDateTime searchEnd = null;
+        if (rangeStart == null && rangeEnd == null) {
+            searchStart = LocalDateTime.now();
+        }
+        if (rangeStart != null) searchStart = LocalDateTime.parse(rangeStart, formatter);
+        if (rangeEnd != null) searchEnd = LocalDateTime.parse(rangeEnd, formatter);
+
+
+        Page<Event> searchEvent;
+        if (searchStart != null && searchEnd != null) {
+            searchEvent = eventRepository.findAllAndEventDateIsAfterAndEventDateIsBefore(searchStart, searchEnd);
+        } else if (searchStart != null) {
+            searchEvent = eventRepository.findAllAndEventDateIsAfter(searchStart);
+        } else {
+            searchEvent = eventRepository.findAllAndEventDateIsBefore(searchEnd);
+        }
+        return searchEvent.stream().toList();
     }
 }
