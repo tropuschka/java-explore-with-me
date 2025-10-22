@@ -5,10 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import ru.practicum.categories.model.Category;
+import ru.practicum.events.status.EventRequestStatus;
 import ru.practicum.users.model.User;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 @Entity
@@ -42,6 +44,8 @@ public class Event {
     private Set<Request> requests;
 
     public int getParticipantAmount() {
-        return requests.size();
+        Set<Request> approved = requests.stream()
+                .filter(r -> r.getStatus().equals(EventRequestStatus.CONFIRMED)).collect(Collectors.toSet());
+        return approved.size();
     }
 }
