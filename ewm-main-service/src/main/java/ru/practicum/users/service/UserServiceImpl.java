@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.practicum.users.dto.NewUserRequest;
 import ru.practicum.users.dto.UserDto;
 import ru.practicum.users.mapping.UserMapper;
 import ru.practicum.users.model.User;
@@ -27,5 +28,12 @@ public class UserServiceImpl implements UserService {
         }
         else users = userRepository.findByIdIn(ids, PageRequest.of(from, size, Sort.by(ASC, "id")));
         return users.stream().map(UserMapper::toDto).toList();
+    }
+
+    @Override
+    public UserDto addUser(NewUserRequest newUser) {
+        User user = UserMapper.toUser(newUser);
+        User saved = userRepository.save(user);
+        return UserMapper.toDto(saved);
     }
 }
