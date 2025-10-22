@@ -24,8 +24,6 @@ public class StatClient {
     private String path;
     private final RestTemplate restTemplate;
     private static final String timeFormat = "yyyy-MM-dd HH:mm:ss";
-    @Value("${application.name}")
-    private String application;
 
     public StatClient() {
         this.restTemplate = new RestTemplateBuilder()
@@ -34,7 +32,7 @@ public class StatClient {
                 .build();
     }
 
-    public void saveStat(HttpServletRequest request) {
+    public void saveStat(HttpServletRequest request, String application) {
         StatDto statDto = new StatDto(null, application, request.getRemoteAddr(), request.getRequestURI(),
                 LocalDateTime.now().toString());
         restTemplate.postForLocation(path + "/hit", statDto);

@@ -48,6 +48,8 @@ public class Event {
     private int participantLimit;
     @Column(name = "request_moderation", nullable = false)
     private boolean requestModeration;
+    @Column(name = "description", nullable = false)
+    private String description;
 
     public int getParticipantAmount() {
         Set<Request> approved = requests.stream()

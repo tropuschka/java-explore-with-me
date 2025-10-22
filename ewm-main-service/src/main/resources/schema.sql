@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS event (
     published timestamp without time zone,
     participant_limit int not null,
     request_moderation boolean not null,
+    description text not null,
     CONSTRAINT pk_event PRIMARY KEY (id),
     CONSTRAINT fk_event_category FOREIGN KEY (category_id) REFERENCES category(id),
     CONSTRAINT fk_event_initiator FOREIGN KEY (initiator) REFERENCES users(id)

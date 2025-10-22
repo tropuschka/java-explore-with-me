@@ -1,17 +1,15 @@
 package ru.practicum.events.repository;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import ru.practicum.events.dto.EventShortDto;
 import ru.practicum.events.model.Event;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
-    @Query("SELECT new ru.practicum.events.dto.EventShortDto() " +
-            "FROM Event event " +
-            "WHERE event.id IN :ids " +
-            "GROUP BY event.id " +
-            "ORDER BY event.id")
-    List<EventShortDto> findAllShortById(List<Long> ids);
+    Page<Event> findAllAndEventDateIsAfterAndEventDateIsBefore(LocalDateTime start, LocalDateTime end);
+
+    Page<Event> findAllAndEventDateIsAfter(LocalDateTime start);
+
+    Page<Event> findAllAndEventDateIsBefore(LocalDateTime end);
 }
