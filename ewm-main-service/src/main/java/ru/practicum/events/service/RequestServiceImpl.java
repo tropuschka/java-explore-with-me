@@ -46,6 +46,15 @@ public class RequestServiceImpl implements RequestService {
         return RequestMapper.toDto(saved);
     }
 
+    @Override
+    public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
+        checkUser(userId);
+        Request request = checkRequest(requestId);
+        request.setStatus(EventRequestStatus.CANCELLED);
+        Request saved = requestRepository.save(request);
+        return RequestMapper.toDto(saved);
+    }
+
     private void checkUser(Long userId) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) throw new NotFoundException("Пользователь не найден");
@@ -66,6 +75,12 @@ public class RequestServiceImpl implements RequestService {
 
     private Optional<Request> checkRequest(Long userId, Long eventId) {
         return Optional.of(requestRepository.findByParticipantIdAndEventId(userId, eventId));
+    }
+
+    private Request checkRequest(Long requestId) {
+        Optional<Request> request = requestRepository.findById(requestId);
+        if (request.isEmpty()) throw new NotFoundException("Запрос не найден");
+        return request.get();
     }
 
     private void checkInitiator(Long userId, Event event) {

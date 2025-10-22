@@ -30,4 +30,10 @@ public class RequestController {
     public ResponseEntity<ParticipationRequestDto> postRequest(@RequestParam Long userId, @RequestParam Long eventId) {
         return new ResponseEntity<>(requestService.postRequest(userId, eventId), HttpStatus.CREATED);
     }
+
+    @PatchMapping("/{requestId}/cancel")
+    public ResponseEntity<ParticipationRequestDto> cancelRequest(@PathVariable Long userId,
+                                                                 @PathVariable Long requestId) {
+        return new ResponseEntity<>(requestService.cancelRequest(userId, requestId), HttpStatus.OK);
+    }
 }
