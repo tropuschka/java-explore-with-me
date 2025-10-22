@@ -4,10 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.practicum.events.dto.participation.ParticipationRequestDto;
 import ru.practicum.events.service.RequestService;
 
@@ -27,5 +24,10 @@ public class RequestController {
     @GetMapping
     public ResponseEntity<List<ParticipationRequestDto>> getRequests(@PathVariable Long userId) {
         return new ResponseEntity<>(requestService.getUserRequests(userId), HttpStatus.OK);
+    }
+
+    @PostMapping
+    public ResponseEntity<ParticipationRequestDto> postRequest(@RequestParam Long userId, @RequestParam Long eventId) {
+        return new ResponseEntity<>(requestService.postRequest(userId, eventId), HttpStatus.CREATED);
     }
 }

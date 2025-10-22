@@ -19,6 +19,9 @@ CREATE TABLE IF NOT EXISTS event (
     paid boolean default false,
     title varchar not null,
     views bigint default 0,
+    published timestamp without time zone,
+    participant_limit int not null,
+    request_moderation boolean not null,
     CONSTRAINT pk_event PRIMARY KEY (id),
     CONSTRAINT fk_event_category FOREIGN KEY (category_id) REFERENCES category(id),
     CONSTRAINT fk_event_initiator FOREIGN KEY (initiator) REFERENCES users(id)

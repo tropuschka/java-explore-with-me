@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface RequestService {
     List<ParticipationRequestDto> getUserRequests(Long userId);
+
+    ParticipationRequestDto postRequest(Long userId, Long eventId);
 }

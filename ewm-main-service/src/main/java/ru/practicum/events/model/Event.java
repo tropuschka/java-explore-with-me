@@ -25,7 +25,7 @@ public class Event {
     @Column(name = "annotation", nullable = false)
     private String annotation;
     @ManyToOne
-    @JoinColumn(name = "category_id", nullable = true)
+    @JoinColumn(name = "category_id")
     private Category category;
     @Column(name = "event_date", nullable = false)
     private LocalDateTime eventDate;
@@ -42,6 +42,12 @@ public class Event {
     @JoinTable(name = "participation", joinColumns = @JoinColumn(name = "event_id"),
             inverseJoinColumns = @JoinColumn(name = "id"))
     private Set<Request> requests;
+    @Column(name = "published")
+    private LocalDateTime published;
+    @Column(name = "participant_limit", nullable = false)
+    private int participantLimit;
+    @Column(name = "request_moderation", nullable = false)
+    private boolean requestModeration;
 
     public int getParticipantAmount() {
         Set<Request> approved = requests.stream()
