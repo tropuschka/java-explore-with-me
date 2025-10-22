@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import ru.practicum.events.dto.EventFullDto;
 import ru.practicum.events.dto.EventShortDto;
 import ru.practicum.events.mapping.EventMapper;
 import ru.practicum.events.model.Event;
@@ -11,12 +12,14 @@ import ru.practicum.events.repository.EventRepository;
 import ru.practicum.events.status.EventSort;
 import ru.practicum.exceptions.ConditionsNotMetException;
 import ru.practicum.client.StatClient;
+import ru.practicum.exceptions.NotFoundException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -96,5 +99,19 @@ public class EventServiceImpl implements EventService {
         }
         statClient.saveStat(httpServletRequest, "events/search");
         return searchList;
+    }
+
+    @Override
+    public EventFullDto getEvent(Long eventId, HttpServletRequest httpServletRequest) {
+        Event event = searchEvent(eventId);
+        if (event.getPublished() == null) throw new ConditionsNotMetException("Событие недоступно");
+        statClient.saveStat(httpServletRequest, "events/get");
+        return EventMapper.toFullDto(event);
+    }
+
+    private Event searchEvent(Long eventId) {
+        Optional<Event> event = eventRepository.findById(eventId);
+        if (event.isEmpty()) throw new NotFoundException("Событие не найдено");
+        return event.get();
     }
 }

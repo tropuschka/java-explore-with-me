@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import ru.practicum.categories.model.Category;
 import ru.practicum.events.status.EventRequestStatus;
+import ru.practicum.events.status.EventState;
 import ru.practicum.users.model.User;
 
 import java.time.LocalDateTime;
@@ -50,6 +51,13 @@ public class Event {
     private boolean requestModeration;
     @Column(name = "description", nullable = false)
     private String description;
+    @Column(name = "created_on", nullable = false)
+    private LocalDateTime createdOn;
+    @ManyToOne
+    @JoinColumn(name = "location", nullable = false)
+    private Location location;
+    @Column(name = "state", nullable = false)
+    private EventState state;
 
     public int getParticipantAmount() {
         Set<Request> approved = requests.stream()

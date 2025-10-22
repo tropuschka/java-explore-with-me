@@ -5,10 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.events.dto.EventFullDto;
 import ru.practicum.events.dto.EventShortDto;
 import ru.practicum.events.service.EventService;
 import ru.practicum.events.model.Event;
@@ -39,5 +37,10 @@ public class EventController {
                                                       HttpServletRequest httpServletRequest) {
         return new ResponseEntity<>(eventService.search(text, categories, paid, rangeStart, rangeEnd, onlyAvailable,
                 sort, from, size, httpServletRequest), HttpStatus.OK);
+    }
+
+    @GetMapping("/{eventId}")
+    public ResponseEntity<EventFullDto> getEvent(@PathVariable Long eventId, HttpServletRequest httpServletRequest) {
+        return new ResponseEntity<>(eventService.getEvent(eventId, httpServletRequest), HttpStatus.OK);
     }
 }
