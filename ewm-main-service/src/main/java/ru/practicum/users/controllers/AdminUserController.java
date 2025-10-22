@@ -36,4 +36,9 @@ public class AdminUserController {
     public ResponseEntity<UserDto> addUser(@RequestBody @Valid NewUserRequest newUserRequest) {
         return new ResponseEntity<>(userService.addUser(newUserRequest), HttpStatus.CREATED);
     }
+
+    @DeleteMapping("/{userId}")
+    public void deleteUser(@PathVariable Long userId) {
+        userService.deleteUser(userId);
+    }
 }
