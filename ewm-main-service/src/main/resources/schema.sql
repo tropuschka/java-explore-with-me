@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS participation (
     event_id bigint not null,
     participant_id bigint not null,
     status varchar not null,
+    created timestamp without time zone not null,
     CONSTRAINT pk_participation PRIMARY KEY (id),
     CONSTRAINT fk_participation_event_id FOREIGN KEY (event_id) REFERENCES event(id),
     CONSTRAINT fk_participation_participant_id FOREIGN KEY (participant_id) REFERENCES users(id)

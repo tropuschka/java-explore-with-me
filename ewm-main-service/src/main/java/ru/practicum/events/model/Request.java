@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import ru.practicum.events.status.EventRequestStatus;
 
+import java.time.LocalDateTime;
+
 @Data
 @Entity
 @AllArgsConstructor
@@ -21,4 +23,6 @@ public class Request {
     private Long participantId;
     @Column(name = "status", nullable = false)
     private EventRequestStatus status;
+    @Column(name = "created", nullable = false)
+    private LocalDateTime created;
 }
