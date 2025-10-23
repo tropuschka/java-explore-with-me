@@ -55,4 +55,19 @@ public class CategoryServiceImpl implements CategoryService {
         }
         categoryRepository.deleteById(catId);
     }
+
+    @Override
+    public CategoryDto updateCategory(Long catId, NewCategoryDto newCategoryDto) {
+        Optional<Category> categoryOpt = categoryRepository.findById(catId);
+        if (categoryOpt.isEmpty()) throw new NotFoundException("Категория не найдена");
+        Optional<Category> checkUnique = categoryRepository.findByName(newCategoryDto.getName());
+        if (checkUnique.isPresent() && !checkUnique.get().getId().equals(catId)) {
+            throw new ConditionsNotMetException("Такая категория уже добавлена");
+        }
+
+        Category category = categoryOpt.get();
+        category.setName(newCategoryDto.getName());
+        Category saved = categoryRepository.save(category);
+        return CategoryMapper.toDto(saved);
+    }
 }

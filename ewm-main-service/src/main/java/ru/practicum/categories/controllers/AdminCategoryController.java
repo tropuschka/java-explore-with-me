@@ -31,4 +31,10 @@ public class AdminCategoryController {
     public void deleteCategory(@PathVariable Long catId) {
         categoryService.deleteCategory(catId);
     }
+
+    @PatchMapping("/{catId}")
+    public ResponseEntity<CategoryDto> updateCategory(@PathVariable Long catId,
+                                                      @Valid @RequestBody NewCategoryDto newCategoryDto) {
+        return new ResponseEntity<>(categoryService.updateCategory(catId, newCategoryDto), HttpStatus.OK);
+    }
 }
