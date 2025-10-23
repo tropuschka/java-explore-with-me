@@ -5,7 +5,6 @@ import ru.practicum.events.dto.*;
 import ru.practicum.events.dto.participation.EventRequestStatusUpdateRequest;
 import ru.practicum.events.dto.participation.EventRequestStatusUpdateResult;
 import ru.practicum.events.dto.participation.ParticipationRequestDto;
-import ru.practicum.events.model.Event;
 
 import java.util.List;
 
