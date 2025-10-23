@@ -24,6 +24,10 @@ public class EventMapper {
                 event.getTitle(), event.getViews());
     }
 
+    public static Location toLocation(LocationDto locationDto) {
+        return new Location(null, locationDto.getLat(), locationDto.getLon());
+    }
+
     private static LocationDto toLocationDto(Location location) {
         return new LocationDto(location.getLat(), location.getLon());
     }

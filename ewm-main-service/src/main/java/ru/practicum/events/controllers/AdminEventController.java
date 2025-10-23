@@ -4,11 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.practicum.events.dto.EventFullDto;
+import ru.practicum.events.dto.UpdateEventAdminRequest;
 import ru.practicum.events.service.EventService;
 import ru.practicum.events.status.EventState;
 
@@ -35,5 +33,11 @@ public class AdminEventController {
                                                      @RequestParam(defaultValue = "10") int size) {
         return new ResponseEntity<>(eventService.adminSearch(users, states, categories, rangeStart, rangeEnd, from, size),
                 HttpStatus.OK);
+    }
+
+    @PatchMapping("/{eventId}")
+    public ResponseEntity<EventFullDto> update(@PathVariable Long eventId,
+                                               @RequestBody UpdateEventAdminRequest updateEventAdminRequest) {
+        return new ResponseEntity<>(eventService.adminEventUpdate(eventId, updateEventAdminRequest), HttpStatus.OK);
     }
 }

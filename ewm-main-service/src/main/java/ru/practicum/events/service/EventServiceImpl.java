@@ -4,13 +4,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import ru.practicum.categories.model.Category;
+import ru.practicum.categories.repository.CategoryRepository;
 import ru.practicum.events.dto.EventFullDto;
 import ru.practicum.events.dto.EventShortDto;
+import ru.practicum.events.dto.UpdateEventAdminRequest;
 import ru.practicum.events.mapping.EventMapper;
 import ru.practicum.events.model.Event;
+import ru.practicum.events.model.Location;
 import ru.practicum.events.repository.EventRepository;
+import ru.practicum.events.repository.LocationRepository;
 import ru.practicum.events.status.EventSort;
 import ru.practicum.events.status.EventState;
+import ru.practicum.events.status.StateAction;
 import ru.practicum.exceptions.ConditionsNotMetException;
 import ru.practicum.client.StatClient;
 import ru.practicum.exceptions.NotFoundException;
@@ -27,6 +33,8 @@ import java.util.Optional;
 public class EventServiceImpl implements EventService {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final EventRepository eventRepository;
+    private final CategoryRepository categoryRepository;
+    private final LocationRepository locationRepository;
     private final StatClient statClient;
 
     @Override
@@ -124,6 +132,57 @@ public class EventServiceImpl implements EventService {
         return searchList;
     }
 
+    @Override
+    public EventFullDto adminEventUpdate(Long eventId, UpdateEventAdminRequest updateRequest) {
+        Event event = searchEvent(eventId);
+
+        if (updateRequest.getAnnotation() != null && !updateRequest.getAnnotation().isBlank()) {
+            event.setAnnotation(updateRequest.getAnnotation());
+        }
+        if (updateRequest.getCategory() != null) event.setCategory(searchCategory(updateRequest.getCategory()));
+        if (updateRequest.getDescription() != null && !updateRequest.getDescription().isBlank()) {
+            event.setDescription(updateRequest.getDescription());
+        }
+        if (updateRequest.getEventDate() != null && !updateRequest.getEventDate().isBlank()) {
+            LocalDateTime newEventDate = LocalDateTime.parse(updateRequest.getEventDate(), formatter);
+            if (event.getPublished() != null && newEventDate.isBefore(event.getPublished().minusHours(1))) {
+                throw new ConditionsNotMetException("Событие должно начинаться не раньше, чем за час до публикации");
+            }
+            event.setEventDate(newEventDate);
+        }
+        if (updateRequest.getLocation() != null) {
+            Location location = locationRepository.findByLatAndLon(updateRequest.getLocation().getLat(),
+                    updateRequest.getLocation().getLon());
+            event.setLocation(location);
+        }
+        if (updateRequest.getPaid() != null) event.setPaid(updateRequest.getPaid());
+        if (updateRequest.getParticipantLimit() != null) event.setParticipantLimit(updateRequest.getParticipantLimit());
+        if (updateRequest.getRequestModeration() != null) {
+            event.setRequestModeration(updateRequest.getRequestModeration());
+        }
+        if (updateRequest.getStateAction() != null && !updateRequest.getStateAction().isBlank()) {
+            StateAction stateAction = StateAction.valueOf(updateRequest.getStateAction().toUpperCase());
+            if (stateAction.equals(StateAction.PUBLISH_EVENT)) {
+                if (!event.getState().equals(EventState.PENDING)) {
+                    throw new ConditionsNotMetException("Событие отменено или уже опубликовано");
+                }
+                event.setPublished(LocalDateTime.now());
+                event.setState(EventState.PUBLISHED);
+            }
+            if (stateAction.equals(StateAction.REJECT_EVENT)) {
+                if (event.getState().equals(EventState.PUBLISHED)) {
+                    throw new ConditionsNotMetException("Нельзя отменить уже опубликованное событие");
+                }
+                event.setState(EventState.CANCELLED);
+            }
+        }
+        if (updateRequest.getTitle() != null && !updateRequest.getTitle().isBlank()) {
+            event.setTitle(updateRequest.getTitle());
+        }
+        Event saved = eventRepository.save(event);
+        return EventMapper.toFullDto(saved);
+    }
+
     private Event searchEvent(Long eventId) {
         Optional<Event> event = eventRepository.findById(eventId);
         if (event.isEmpty()) throw new NotFoundException("Событие не найдено");
@@ -149,5 +208,11 @@ public class EventServiceImpl implements EventService {
             searchEvent = eventRepository.findAllAndEventDateIsBefore(searchEnd);
         }
         return searchEvent.stream().toList();
+    }
+
+    private Category searchCategory(Long categoryId) {
+        Optional<Category> category = categoryRepository.findById(categoryId);
+        if (category.isEmpty()) throw new NotFoundException("Категория не найдена");
+        return category.get();
     }
 }
