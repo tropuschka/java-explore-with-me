@@ -112,8 +112,9 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventFullDto> adminSearch(List<Long> users, List<String> states, List<Long> categories,
+    public List<EventFullDto> adminSearch(Long adminId, List<Long> users, List<String> states, List<Long> categories,
                                           String rangeStart, String rangeEnd, int from, int size) {
+        checkAdmin(adminId);
         List<Event> events = search(rangeStart, rangeEnd);
 
         if (users != null && !users.isEmpty()) {
@@ -142,7 +143,8 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto adminEventUpdate(Long eventId, UpdateEventAdminRequest updateRequest) {
+    public EventFullDto adminEventUpdate(Long adminId, Long eventId, UpdateEventAdminRequest updateRequest) {
+        checkAdmin(adminId);
         Event event = searchEvent(eventId);
 
         if (updateRequest.getAnnotation() != null && !updateRequest.getAnnotation().isBlank()) {
@@ -187,15 +189,15 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventShortDto> getUserEvents(Long userId) {
-        checkUser(userId);
+    public List<EventShortDto> getUserEvents(Long headerId, Long userId) {
+        checkUser(userId, headerId);
         List<Event> events = eventRepository.findByInitiatorId(userId);
         return events.stream().map(EventMapper::toShortDto).toList();
     }
 
     @Override
-    public EventFullDto createEvent(Long userId, NewEventDto newEventDto) {
-        User user = checkUser(userId);
+    public EventFullDto createEvent(Long headerId, Long userId, NewEventDto newEventDto) {
+        User user = checkUser(userId, headerId);
         Event event = EventMapper.toEvent(newEventDto);
         checkEventDate(event.getEventDate());
 
@@ -210,17 +212,18 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto getUserEventById(Long userId, Long eventId) {
+    public EventFullDto getUserEventById(Long headerId, Long userId, Long eventId) {
         Event event = searchEvent(eventId);
-        checkInitiator(userId, event.getInitiator().getId(),
+        checkInitiator(userId, headerId, event.getInitiator().getId(),
                 "Просматривать полную информацию о событии может только его инициатор");
         return EventMapper.toFullDto(event);
     }
 
     @Override
-    public EventFullDto userEventUpdate(Long userId, Long eventId, UpdateEventUserRequest updateRequest) {
+    public EventFullDto userEventUpdate(Long headerId, Long userId, Long eventId, UpdateEventUserRequest updateRequest) {
         Event event = searchEvent(eventId);
-        checkInitiator(userId, event.getInitiator().getId(), "Изменять событие может только его инициатор");
+        checkInitiator(userId, headerId, event.getInitiator().getId(),
+                "Изменять событие может только его инициатор");
         if (event.getState().equals(EventState.PUBLISHED)) {
             throw new ConditionsNotMetException("Изменять можно только отмененные и ожидающие модерации события");
         }
@@ -264,19 +267,19 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
+    public List<ParticipationRequestDto> getEventRequests(Long headerId, Long userId, Long eventId) {
         Event event = searchEvent(eventId);
-        checkInitiator(userId, event.getInitiator().getId(),
+        checkInitiator(userId, headerId, event.getInitiator().getId(),
                 "Просматривать заявки на участие в событии может только его инициатор");
         List<Request> requests = requestRepository.findByEventId(eventId);
         return requests.stream().map(RequestMapper::toDto).toList();
     }
 
     @Override
-    public EventRequestStatusUpdateResult updateRequestStatus(Long userId, Long eventId,
+    public EventRequestStatusUpdateResult updateRequestStatus(Long headerId, Long userId, Long eventId,
                                                               EventRequestStatusUpdateRequest request) {
         Event event = searchEvent(eventId);
-        checkInitiator(userId, event.getInitiator().getId(),
+        checkInitiator(userId, headerId, event.getInitiator().getId(),
                 "Принимать и отклонять заявки на участие в событии может только его инициатор");
         EventRequestStatus newStatus = EventRequestStatus.valueOf(request.getStatus().toUpperCase());
 
@@ -342,14 +345,15 @@ public class EventServiceImpl implements EventService {
         return category.get();
     }
 
-    private User checkUser(Long userId) {
+    private User checkUser(Long userId, Long headerId) {
+        if (!userId.equals(headerId)) throw new ConditionsNotMetException("Доступ запрещен");
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) throw new NotFoundException("Пользователь не найден");
         return user.get();
     }
 
-    private void checkInitiator(Long userId, Long initiatorId, String msg) {
-        checkUser(userId);
+    private void checkInitiator(Long userId, Long headerId, Long initiatorId, String msg) {
+        checkUser(userId, headerId);
         if (!initiatorId.equals(userId)) {
             throw new ConditionsNotMetException(msg);
         }
@@ -372,5 +376,10 @@ public class EventServiceImpl implements EventService {
 
     private Location checkLocation(LocationDto locationDto) {
         return locationRepository.findByLatAndLon(locationDto.getLat(), locationDto.getLon());
+    }
+
+    private void checkAdmin(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) throw new NotFoundException("Пользователь не найден");
     }
 }

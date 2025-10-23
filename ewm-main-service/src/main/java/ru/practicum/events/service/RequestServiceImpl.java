@@ -27,15 +27,15 @@ public class RequestServiceImpl implements RequestService {
     private final EventRepository eventRepository;
 
     @Override
-    public List<ParticipationRequestDto> getUserRequests (Long userId) {
-        checkUser(userId);
+    public List<ParticipationRequestDto> getUserRequests (Long headerId, Long userId) {
+        checkUser(userId, headerId);
         List<Request> requests = requestRepository.findByParticipantId(userId);
         return requests.stream().map(RequestMapper::toDto).toList();
     }
 
     @Override
-    public ParticipationRequestDto postRequest(Long userId, Long eventId) {
-        checkUser(userId);
+    public ParticipationRequestDto postRequest(Long headerId, Long userId, Long eventId) {
+        checkUser(userId, headerId);
         Event event = checkEvent(eventId);
         checkInitiator(userId, event);
         Optional<Request> check = checkRequest(userId, eventId);
@@ -49,15 +49,16 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
-        checkUser(userId);
+    public ParticipationRequestDto cancelRequest(Long headerId, Long userId, Long requestId) {
+        checkUser(userId, headerId);
         Request request = checkRequest(requestId);
         request.setStatus(EventRequestStatus.CANCELLED);
         Request saved = requestRepository.save(request);
         return RequestMapper.toDto(saved);
     }
 
-    private void checkUser(Long userId) {
+    private void checkUser(Long userId, Long headerId) {
+        if (!userId.equals(headerId)) throw new ConditionsNotMetException("Доступ запрещен");
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) throw new NotFoundException("Пользователь не найден");
     }

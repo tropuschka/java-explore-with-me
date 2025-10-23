@@ -13,6 +13,8 @@ import ru.practicum.events.model.Event;
 import ru.practicum.events.repository.EventRepository;
 import ru.practicum.exceptions.ConditionsNotMetException;
 import ru.practicum.exceptions.NotFoundException;
+import ru.practicum.users.model.User;
+import ru.practicum.users.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +24,7 @@ import java.util.Optional;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final EventRepository eventRepository;
+    private final UserRepository userRepository;
 
     @Override
     public List<CategoryDto> getCategories(int from, int size) {
@@ -37,7 +40,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto addCategory(NewCategoryDto newCategoryDto) {
+    public CategoryDto addCategory(Long adminId, NewCategoryDto newCategoryDto) {
+        checkAdmin(adminId);
         Category category = CategoryMapper.toCategory(newCategoryDto);
         Optional<Category> checkUniqueName = categoryRepository.findByName(category.getName());
         if (checkUniqueName.isPresent()) throw new ConditionsNotMetException("Такая категория уже добавлена");
@@ -46,7 +50,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void deleteCategory(Long catId) {
+    public void deleteCategory(Long adminId, Long catId) {
+        checkAdmin(adminId);
         Optional<Category> category = categoryRepository.findById(catId);
         if (category.isEmpty()) throw new NotFoundException("Категория не найдена");
         List<Event> categoryEvents = eventRepository.findByCategoryId(catId);
@@ -57,7 +62,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto updateCategory(Long catId, NewCategoryDto newCategoryDto) {
+    public CategoryDto updateCategory(Long adminId, Long catId, NewCategoryDto newCategoryDto) {
+        checkAdmin(adminId);
         Optional<Category> categoryOpt = categoryRepository.findById(catId);
         if (categoryOpt.isEmpty()) throw new NotFoundException("Категория не найдена");
         Optional<Category> checkUnique = categoryRepository.findByName(newCategoryDto.getName());
@@ -69,5 +75,11 @@ public class CategoryServiceImpl implements CategoryService {
         category.setName(newCategoryDto.getName());
         Category saved = categoryRepository.save(category);
         return CategoryMapper.toDto(saved);
+    }
+
+    // Пока просто проверка на существующего пользователя. Добавить ли поле is_admin или отдельную таблицу с админами?
+    private void checkAdmin(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) throw new NotFoundException("Пользователь не найден");
     }
 }

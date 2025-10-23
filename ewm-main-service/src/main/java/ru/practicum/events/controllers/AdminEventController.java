@@ -16,6 +16,7 @@ import java.util.List;
 @Validated
 public class AdminEventController {
     private final EventService eventService;
+    private final String userIdHeader = "X-Sharer-User-Id";
 
     @Autowired
     public AdminEventController (EventService eventService) {
@@ -23,20 +24,24 @@ public class AdminEventController {
     }
 
     @GetMapping
-    public ResponseEntity<List<EventFullDto>> search(@RequestParam(required = false) List<Long> users,
+    public ResponseEntity<List<EventFullDto>> search(@RequestHeader(userIdHeader) Long adminId,
+                                                     @RequestParam(required = false) List<Long> users,
                                                      @RequestParam(required = false) List<String> states,
                                                      @RequestParam(required = false) List<Long> categories,
                                                      @RequestParam(required = false) String rangeStart,
                                                      @RequestParam(required = false) String rangeEnd,
                                                      @RequestParam(defaultValue = "0") int from,
                                                      @RequestParam(defaultValue = "10") int size) {
-        return new ResponseEntity<>(eventService.adminSearch(users, states, categories, rangeStart, rangeEnd, from, size),
-                HttpStatus.OK);
+        return new ResponseEntity<>(
+                eventService.adminSearch(adminId, users, states, categories, rangeStart, rangeEnd, from, size),
+                HttpStatus.OK
+        );
     }
 
     @PatchMapping("/{eventId}")
-    public ResponseEntity<EventFullDto> update(@PathVariable Long eventId,
+    public ResponseEntity<EventFullDto> update(@RequestHeader(userIdHeader) Long adminId, @PathVariable Long eventId,
                                                @RequestBody UpdateEventAdminRequest updateEventAdminRequest) {
-        return new ResponseEntity<>(eventService.adminEventUpdate(eventId, updateEventAdminRequest), HttpStatus.OK);
+        return new ResponseEntity<>(eventService.adminEventUpdate(adminId, eventId, updateEventAdminRequest),
+                HttpStatus.OK);
     }
 }

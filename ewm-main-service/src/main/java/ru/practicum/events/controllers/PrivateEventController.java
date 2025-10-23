@@ -23,6 +23,7 @@ import java.util.List;
 @Validated
 public class PrivateEventController {
     private final EventService eventService;
+    private final String userIdHeader = "X-Sharer-User-Id";
 
     @Autowired
     public PrivateEventController(EventService eventService) {
@@ -30,40 +31,46 @@ public class PrivateEventController {
     }
 
     @GetMapping
-    public ResponseEntity<List<EventShortDto>> getUserEvents(@PathVariable Long userId) {
-        return new ResponseEntity<>(eventService.getUserEvents(userId), HttpStatus.OK);
+    public ResponseEntity<List<EventShortDto>> getUserEvents(@RequestHeader(userIdHeader) Long headerId,
+                                                             @PathVariable Long userId) {
+        return new ResponseEntity<>(eventService.getUserEvents(headerId, userId), HttpStatus.OK);
     }
 
     @PostMapping
     @Validated
-    public ResponseEntity<EventFullDto> postEvent(@PathVariable Long userId, @Valid @RequestBody NewEventDto newEvent) {
-        return new ResponseEntity<>(eventService.createEvent(userId, newEvent), HttpStatus.CREATED);
+    public ResponseEntity<EventFullDto> postEvent(@RequestHeader(userIdHeader) Long headerId,
+                                                  @PathVariable Long userId, @Valid @RequestBody NewEventDto newEvent) {
+        return new ResponseEntity<>(eventService.createEvent(headerId, userId, newEvent), HttpStatus.CREATED);
     }
 
     @GetMapping("/{eventId}")
-    public ResponseEntity<EventFullDto> getEventById(@PathVariable Long userId, @PathVariable Long eventId) {
-        return new ResponseEntity<>(eventService.getUserEventById(userId, eventId), HttpStatus.OK);
+    public ResponseEntity<EventFullDto> getEventById(@RequestHeader(userIdHeader) Long headerId,
+                                                     @PathVariable Long userId, @PathVariable Long eventId) {
+        return new ResponseEntity<>(eventService.getUserEventById(headerId, userId, eventId), HttpStatus.OK);
     }
 
     @PatchMapping("/{eventId}")
     @Validated
-    public ResponseEntity<EventFullDto> updateEvent(@PathVariable Long userId, @PathVariable Long eventId,
+    public ResponseEntity<EventFullDto> updateEvent(@RequestHeader(userIdHeader) Long headerId,
+                                                    @PathVariable Long userId, @PathVariable Long eventId,
                                                     @Valid @RequestBody UpdateEventUserRequest updateEventUserRequest) {
-        return new ResponseEntity<>(eventService.userEventUpdate(userId, eventId, updateEventUserRequest),
+        return new ResponseEntity<>(eventService.userEventUpdate(headerId, userId, eventId, updateEventUserRequest),
                 HttpStatus.OK);
     }
 
     @GetMapping("/{eventId}/requests")
-    public ResponseEntity<List<ParticipationRequestDto>> getEventRequests(@PathVariable Long userId,
+    public ResponseEntity<List<ParticipationRequestDto>> getEventRequests(@RequestHeader(userIdHeader) Long headerId,
+                                                                          @PathVariable Long userId,
                                                                           @PathVariable Long eventId) {
-        return new ResponseEntity<>(eventService.getEventRequests(userId, eventId), HttpStatus.OK);
+        return new ResponseEntity<>(eventService.getEventRequests(headerId, userId, eventId), HttpStatus.OK);
     }
 
     @PatchMapping("/{eventId}/requests")
     @Validated
-    public ResponseEntity<EventRequestStatusUpdateResult> updateRequestStatus(@PathVariable Long userId,
+    public ResponseEntity<EventRequestStatusUpdateResult> updateRequestStatus(@RequestHeader(userIdHeader) Long headerId,
+                                                                              @PathVariable Long userId,
                                                               @PathVariable Long eventId,
                                                               @RequestBody EventRequestStatusUpdateRequest request) {
-        return new ResponseEntity<>(eventService.updateRequestStatus(userId, eventId, request), HttpStatus.OK);
+        return new ResponseEntity<>(eventService.updateRequestStatus(headerId, userId, eventId, request), HttpStatus.OK);
     }
 }

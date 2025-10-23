@@ -13,6 +13,8 @@ import ru.practicum.compilations.repository.CompilationRepository;
 import ru.practicum.events.model.Event;
 import ru.practicum.events.repository.EventRepository;
 import ru.practicum.exceptions.NotFoundException;
+import ru.practicum.users.model.User;
+import ru.practicum.users.repository.UserRepository;
 
 import java.util.HashSet;
 import java.util.List;
@@ -24,9 +26,11 @@ import java.util.Set;
 public class CompilationServiceImpl implements CompilationService {
     private final CompilationRepository compilationRepository;
     private final EventRepository eventRepository;
+    private final UserRepository userRepository;
 
     @Override
-    public CompilationDto addCompilation(NewCompilationDto newCompilationDto) {
+    public CompilationDto addCompilation(Long adminId, NewCompilationDto newCompilationDto) {
+        checkAdmin(adminId);
         Compilation compilation = CompilationMapper.toCompilation(newCompilationDto);
 
         if (newCompilationDto.getEvents() != null && !newCompilationDto.getEvents().isEmpty()) {
@@ -39,13 +43,15 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    public void deleteCompilation(Long compilationId) {
+    public void deleteCompilation(Long adminId, Long compilationId) {
+        checkAdmin(adminId);
         findCompilation(compilationId);
         compilationRepository.deleteById(compilationId);
     }
 
     @Override
-    public CompilationDto updateCompilation(Long id, UpdateCompilationRequest request) {
+    public CompilationDto updateCompilation(Long adminId, Long id, UpdateCompilationRequest request) {
+        checkAdmin(adminId);
         Compilation compilation = findCompilation(id);
         if (request.getEvents() != null) {
             List<Event> compilationEvents = checkEvents(request.getEvents());
@@ -86,5 +92,10 @@ public class CompilationServiceImpl implements CompilationService {
             throw new NotFoundException("Найдены не все события");
         }
         return compilationEvents;
+    }
+
+    private void checkAdmin(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) throw new NotFoundException("Пользователь не найден");
     }
 }

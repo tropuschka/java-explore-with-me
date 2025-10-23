@@ -23,7 +23,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
-    public List<UserDto> search(List<Long> ids, int from, int size) {
+    public List<UserDto> search(Long adminId, List<Long> ids, int from, int size) {
+        checkAdmin(adminId);
         Page<User> users;
         if (ids == null || ids.isEmpty()) {
             users = userRepository.findAll(PageRequest.of(from, size, Sort.by(ASC, "id")));
@@ -33,14 +34,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto addUser(NewUserRequest newUser) {
+    public UserDto addUser(Long adminId, NewUserRequest newUser) {
+        checkAdmin(adminId);
         User user = UserMapper.toUser(newUser);
         User saved = userRepository.save(user);
         return UserMapper.toDto(saved);
     }
 
     @Override
-    public void deleteUser(Long userId) {
+    public void deleteUser(Long adminId, Long userId) {
+        checkAdmin(adminId);
         checkUser(userId);
         userRepository.deleteById(userId);
     }
@@ -48,5 +51,10 @@ public class UserServiceImpl implements UserService {
     private void checkUser(Long userId) {
         Optional<User> check = userRepository.findById(userId);
         if (check.isEmpty()) throw new NotFoundException("Пользователь не найден");
+    }
+
+    private void checkAdmin(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) throw new NotFoundException("Пользователь не найден");
     }
 }

@@ -15,6 +15,7 @@ import ru.practicum.categories.service.CategoryService;
 @Validated
 public class AdminCategoryController {
     private final CategoryService categoryService;
+    private final String userIdHeader = "X-Sharer-User-Id";
 
     @Autowired
     public AdminCategoryController(CategoryService categoryService) {
@@ -23,18 +24,20 @@ public class AdminCategoryController {
 
     @PostMapping
     @Validated
-    public ResponseEntity<CategoryDto> addCategory(@Valid @RequestBody NewCategoryDto newCategoryDto) {
-        return new ResponseEntity<>(categoryService.addCategory(newCategoryDto), HttpStatus.CREATED);
+    public ResponseEntity<CategoryDto> addCategory(@RequestHeader(userIdHeader) Long adminId,
+            @Valid @RequestBody NewCategoryDto newCategoryDto) {
+        return new ResponseEntity<>(categoryService.addCategory(adminId, newCategoryDto), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{catId}")
-    public void deleteCategory(@PathVariable Long catId) {
-        categoryService.deleteCategory(catId);
+    public void deleteCategory(@RequestHeader(userIdHeader) Long adminId, @PathVariable Long catId) {
+        categoryService.deleteCategory(adminId, catId);
     }
 
     @PatchMapping("/{catId}")
-    public ResponseEntity<CategoryDto> updateCategory(@PathVariable Long catId,
+    public ResponseEntity<CategoryDto> updateCategory(@RequestHeader(userIdHeader) Long adminId,
+                                                      @PathVariable Long catId,
                                                       @Valid @RequestBody NewCategoryDto newCategoryDto) {
-        return new ResponseEntity<>(categoryService.updateCategory(catId, newCategoryDto), HttpStatus.OK);
+        return new ResponseEntity<>(categoryService.updateCategory(adminId, catId, newCategoryDto), HttpStatus.OK);
     }
 }

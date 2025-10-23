@@ -15,20 +15,21 @@ public interface EventService {
 
     EventFullDto getEvent(Long eventId, HttpServletRequest httpServletRequest);
 
-    List<EventFullDto> adminSearch(List<Long> users, List<String> states, List<Long> categories, String rangeStart,
-                                   String rangeEnd, int from, int size);
+    List<EventFullDto> adminSearch(Long adminId, List<Long> users, List<String> states, List<Long> categories,
+                                   String rangeStart, String rangeEnd, int from, int size);
 
-    EventFullDto adminEventUpdate(Long eventId, UpdateEventAdminRequest eventAdminRequest);
+    EventFullDto adminEventUpdate(Long adminId, Long eventId, UpdateEventAdminRequest eventAdminRequest);
 
-    List<EventShortDto> getUserEvents(Long userId);
+    List<EventShortDto> getUserEvents(Long headerId, Long userId);
 
-    EventFullDto createEvent(Long userId, NewEventDto newEventDto);
+    EventFullDto createEvent(Long headerId, Long userId, NewEventDto newEventDto);
 
-    EventFullDto getUserEventById(Long userId, Long eventId);
+    EventFullDto getUserEventById(Long headerId, Long userId, Long eventId);
 
-    EventFullDto userEventUpdate(Long userId, Long eventId, UpdateEventUserRequest updateEventUserRequest);
+    EventFullDto userEventUpdate(Long headerId, Long userId, Long eventId, UpdateEventUserRequest updateEventUserRequest);
 
-    List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId);
+    List<ParticipationRequestDto> getEventRequests(Long headerId, Long userId, Long eventId);
 
-    EventRequestStatusUpdateResult updateRequestStatus(Long userId, Long eventId, EventRequestStatusUpdateRequest request);
+    EventRequestStatusUpdateResult updateRequestStatus(Long headerId, Long userId, Long eventId,
+                                                       EventRequestStatusUpdateRequest request);
 }
