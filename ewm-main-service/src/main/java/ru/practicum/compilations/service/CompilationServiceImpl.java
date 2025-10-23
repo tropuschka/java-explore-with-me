@@ -58,7 +58,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    public List<CompilationDto> getCompillations(Boolean pinned, int from, int size) {
+    public List<CompilationDto> getCompilations(Boolean pinned, int from, int size) {
         Page<Compilation> compilations;
         if (pinned == null) {
             compilations = compilationRepository.findAll(PageRequest.of(from, size));
@@ -66,6 +66,12 @@ public class CompilationServiceImpl implements CompilationService {
             compilations = compilationRepository.findByPinned(pinned, PageRequest.of(from, size));
         }
         return compilations.stream().map(CompilationMapper::toDto).toList();
+    }
+
+    @Override
+    public CompilationDto getCompilationById(Long compId) {
+        Compilation compilation = findCompilation(compId);
+        return CompilationMapper.toDto(compilation);
     }
 
     private Compilation findCompilation(Long id) {
