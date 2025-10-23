@@ -6,10 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ru.practicum.categories.model.Category;
 import ru.practicum.categories.repository.CategoryRepository;
-import ru.practicum.events.dto.EventFullDto;
-import ru.practicum.events.dto.EventShortDto;
-import ru.practicum.events.dto.NewEventDto;
-import ru.practicum.events.dto.UpdateEventAdminRequest;
+import ru.practicum.events.dto.*;
 import ru.practicum.events.mapping.EventMapper;
 import ru.practicum.events.model.Event;
 import ru.practicum.events.model.Location;
@@ -148,16 +145,10 @@ public class EventServiceImpl implements EventService {
             event.setDescription(updateRequest.getDescription());
         }
         if (updateRequest.getEventDate() != null && !updateRequest.getEventDate().isBlank()) {
-            LocalDateTime newEventDate = LocalDateTime.parse(updateRequest.getEventDate(), formatter);
-            if (event.getPublished() != null && newEventDate.isBefore(event.getPublished().minusHours(1))) {
-                throw new ConditionsNotMetException("Событие должно начинаться не раньше, чем за час до публикации");
-            }
-            event.setEventDate(newEventDate);
+            event.setEventDate(checkEventDate(updateRequest.getEventDate(), event.getPublished()));
         }
         if (updateRequest.getLocation() != null) {
-            Location location = locationRepository.findByLatAndLon(updateRequest.getLocation().getLat(),
-                    updateRequest.getLocation().getLon());
-            event.setLocation(location);
+            event.setLocation(checkLocation(updateRequest.getLocation()));
         }
         if (updateRequest.getPaid() != null) event.setPaid(updateRequest.getPaid());
         if (updateRequest.getParticipantLimit() != null) event.setParticipantLimit(updateRequest.getParticipantLimit());
@@ -198,10 +189,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto createEvent(Long userId, NewEventDto newEventDto) {
         User user = checkUser(userId);
         Event event = EventMapper.toEvent(newEventDto);
-        if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ConditionsNotMetException("Событие должно начинаться не ранее, " +
-                    "чем через два часа после создания");
-        }
+        checkEventDate(event.getEventDate());
 
         if (newEventDto.getCategory() != null) {
             Category category = searchCategory(newEventDto.getCategory());
@@ -217,10 +205,56 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getUserEventById(Long userId, Long eventId) {
         checkUser(userId);
         Event event = searchEvent(eventId);
-        if (!event.getInitiator().getId().equals(userId)) {
-            throw new ConditionsNotMetException("Просматривать полную информацию о событии может только его инициатор");
-        }
+        checkInitiator(userId, event.getInitiator().getId(),
+                "Просматривать полную информацию о событии может только его инициатор");
         return EventMapper.toFullDto(event);
+    }
+
+    @Override
+    public EventFullDto userEventUpdate(Long userId, Long eventId, UpdateEventUserRequest updateRequest) {
+        checkUser(userId);
+        Event event = searchEvent(eventId);
+        checkInitiator(userId, event.getInitiator().getId(), "Изменять событие может только его инициатор");
+        if (event.getState().equals(EventState.PUBLISHED)) {
+            throw new ConditionsNotMetException("Изменять можно только отмененные и ожидающие модерации события");
+        }
+
+        if (updateRequest.getAnnotation() != null && !updateRequest.getAnnotation().isBlank()) {
+            event.setAnnotation(updateRequest.getAnnotation());
+        }
+        if (updateRequest.getCategory() != null) {
+            event.setCategory(searchCategory(updateRequest.getCategory()));
+        }
+        if (updateRequest.getDescription() != null && !updateRequest.getDescription().isBlank()) {
+            event.setDescription(updateRequest.getDescription());
+        }
+        if (updateRequest.getEventDate() != null && !updateRequest.getEventDate().isBlank()) {
+            event.setEventDate(checkEventDate(updateRequest.getEventDate(), event.getPublished()));
+            checkEventDate(event.getEventDate());
+        }
+        if (updateRequest.getLocation() != null) {
+            event.setLocation(checkLocation(updateRequest.getLocation()));
+        }
+        if (updateRequest.getPaid() != null) event.setPaid(updateRequest.getPaid());
+        if (updateRequest.getParticipantLimit() != null) event.setParticipantLimit(updateRequest.getParticipantLimit());
+        if (updateRequest.getRequestModeration() != null) {
+            event.setRequestModeration(updateRequest.getRequestModeration());
+        }
+        if (updateRequest.getStateAction() != null && !updateRequest.getStateAction().isBlank()) {
+            StateAction stateAction = StateAction.valueOf(updateRequest.getStateAction().toUpperCase());
+            if (stateAction.equals(StateAction.SEND_TO_REVIEW)) {
+                event.setState(EventState.PENDING);
+            }
+            if (stateAction.equals(StateAction.CANCEL_REVIEW)) {
+                event.setState(EventState.CANCELLED);
+            }
+        }
+        if (updateRequest.getTitle() != null && !updateRequest.getTitle().isBlank()) {
+            event.setTitle(updateRequest.getTitle());
+        }
+
+        Event saved = eventRepository.save(event);
+        return EventMapper.toFullDto(saved);
     }
 
     private Event searchEvent(Long eventId) {
@@ -260,5 +294,30 @@ public class EventServiceImpl implements EventService {
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) throw new NotFoundException("Пользователь не найден");
         return user.get();
+    }
+
+    private void checkInitiator(Long userId, Long initiatorId, String msg) {
+        if (!initiatorId.equals(userId)) {
+            throw new ConditionsNotMetException(msg);
+        }
+    }
+
+    private LocalDateTime checkEventDate(String eventDateString, LocalDateTime published) {
+        LocalDateTime newEventDate = LocalDateTime.parse(eventDateString, formatter);
+        if (published != null && newEventDate.isBefore(published.minusHours(1))) {
+            throw new ConditionsNotMetException("Событие должно начинаться не раньше, чем за час до публикации");
+        }
+        return newEventDate;
+    }
+
+    private void checkEventDate(LocalDateTime eventDate) {
+        if (eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
+            throw new ConditionsNotMetException("Событие должно начинаться не ранее, " +
+                    "чем через два часа после создания");
+        }
+    }
+
+    private Location checkLocation(LocationDto locationDto) {
+        return locationRepository.findByLatAndLon(locationDto.getLat(), locationDto.getLon());
     }
 }
