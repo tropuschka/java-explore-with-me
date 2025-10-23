@@ -35,4 +35,9 @@ public class PrivateEventController {
     public ResponseEntity<EventFullDto> postEvent(@PathVariable Long userId, @Valid @RequestBody NewEventDto newEvent) {
         return new ResponseEntity<>(eventService.createEvent(userId, newEvent), HttpStatus.CREATED);
     }
+
+    @GetMapping("/{eventId}")
+    public ResponseEntity<EventFullDto> getEventById(@PathVariable Long userId, @PathVariable Long eventId) {
+        return new ResponseEntity<>(eventService.getUserEventById(userId, eventId), HttpStatus.OK);
+    }
 }

@@ -5,6 +5,7 @@ import ru.practicum.events.dto.EventFullDto;
 import ru.practicum.events.dto.EventShortDto;
 import ru.practicum.events.dto.NewEventDto;
 import ru.practicum.events.dto.UpdateEventAdminRequest;
+import ru.practicum.events.model.Event;
 
 import java.util.List;
 
@@ -23,4 +24,6 @@ public interface EventService {
     List<EventShortDto> getUserEvents(Long userId);
 
     EventFullDto createEvent(Long userId, NewEventDto newEventDto);
+
+    EventFullDto getUserEventById(Long userId, Long eventId);
 }

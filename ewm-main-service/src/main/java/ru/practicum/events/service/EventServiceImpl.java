@@ -213,6 +213,16 @@ public class EventServiceImpl implements EventService {
         return EventMapper.toFullDto(saved);
     }
 
+    @Override
+    public EventFullDto getUserEventById(Long userId, Long eventId) {
+        checkUser(userId);
+        Event event = searchEvent(eventId);
+        if (!event.getInitiator().getId().equals(userId)) {
+            throw new ConditionsNotMetException("Просматривать полную информацию о событии может только его инициатор");
+        }
+        return EventMapper.toFullDto(event);
+    }
+
     private Event searchEvent(Long eventId) {
         Optional<Event> event = eventRepository.findById(eventId);
         if (event.isEmpty()) throw new NotFoundException("Событие не найдено");
