@@ -4,10 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.practicum.categories.dto.CategoryDto;
 import ru.practicum.categories.service.CategoryService;
 
@@ -28,5 +25,10 @@ public class CategoryController {
     public ResponseEntity<List<CategoryDto>> getCategories(@RequestParam(defaultValue = "0") int from,
                                                            @RequestParam(defaultValue = "10") int size) {
         return new ResponseEntity<>(categoryService.getCategories(from, size), HttpStatus.OK);
+    }
+
+    @GetMapping("/{catId}")
+    public ResponseEntity<CategoryDto> getCategoryById(@PathVariable Long catId) {
+        return new ResponseEntity<>(categoryService.getCategoryById(catId), HttpStatus.OK);
     }
 }
