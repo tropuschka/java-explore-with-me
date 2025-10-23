@@ -11,6 +11,8 @@ import ru.practicum.events.dto.EventFullDto;
 import ru.practicum.events.dto.EventShortDto;
 import ru.practicum.events.dto.NewEventDto;
 import ru.practicum.events.dto.UpdateEventUserRequest;
+import ru.practicum.events.dto.participation.EventRequestStatusUpdateRequest;
+import ru.practicum.events.dto.participation.EventRequestStatusUpdateResult;
 import ru.practicum.events.dto.participation.ParticipationRequestDto;
 import ru.practicum.events.service.EventService;
 
@@ -55,5 +57,13 @@ public class PrivateEventController {
     public ResponseEntity<List<ParticipationRequestDto>> getEventRequests(@PathVariable Long userId,
                                                                           @PathVariable Long eventId) {
         return new ResponseEntity<>(eventService.getEventRequests(userId, eventId), HttpStatus.OK);
+    }
+
+    @PatchMapping("/{eventId}/requests")
+    @Validated
+    public ResponseEntity<EventRequestStatusUpdateResult> updateRequestStatus(@PathVariable Long userId,
+                                                              @PathVariable Long eventId,
+                                                              @RequestBody EventRequestStatusUpdateRequest request) {
+        return new ResponseEntity<>(eventService.updateRequestStatus(userId, eventId, request), HttpStatus.OK);
     }
 }

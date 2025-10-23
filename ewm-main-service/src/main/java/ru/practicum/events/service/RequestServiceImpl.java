@@ -41,7 +41,9 @@ public class RequestServiceImpl implements RequestService {
         Optional<Request> check = checkRequest(userId, eventId);
         if (check.isPresent()) throw new DuplicationException("Запрос уже создан");
         Request request = new Request(null, eventId, userId, EventRequestStatus.PENDING, LocalDateTime.now());
-        if (!event.isRequestModeration()) request.setStatus(EventRequestStatus.CONFIRMED);
+        if (!event.isRequestModeration() || event.getParticipantLimit() == 0) {
+            request.setStatus(EventRequestStatus.CONFIRMED);
+        }
         Request saved = requestRepository.save(request);
         return RequestMapper.toDto(saved);
     }

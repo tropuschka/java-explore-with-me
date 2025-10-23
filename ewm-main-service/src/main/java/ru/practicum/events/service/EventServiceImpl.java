@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import ru.practicum.categories.model.Category;
 import ru.practicum.categories.repository.CategoryRepository;
 import ru.practicum.events.dto.*;
+import ru.practicum.events.dto.participation.EventRequestStatusUpdateRequest;
+import ru.practicum.events.dto.participation.EventRequestStatusUpdateResult;
 import ru.practicum.events.dto.participation.ParticipationRequestDto;
 import ru.practicum.events.mapping.EventMapper;
 import ru.practicum.events.mapping.RequestMapper;
@@ -16,6 +18,7 @@ import ru.practicum.events.model.Request;
 import ru.practicum.events.repository.EventRepository;
 import ru.practicum.events.repository.LocationRepository;
 import ru.practicum.events.repository.RequestRepository;
+import ru.practicum.events.status.EventRequestStatus;
 import ru.practicum.events.status.EventSort;
 import ru.practicum.events.status.EventState;
 import ru.practicum.events.status.StateAction;
@@ -267,6 +270,43 @@ public class EventServiceImpl implements EventService {
                 "Просматривать заявки на участие в событии может только его инициатор");
         List<Request> requests = requestRepository.findByEventId(eventId);
         return requests.stream().map(RequestMapper::toDto).toList();
+    }
+
+    @Override
+    public EventRequestStatusUpdateResult updateRequestStatus(Long userId, Long eventId,
+                                                              EventRequestStatusUpdateRequest request) {
+        Event event = searchEvent(eventId);
+        checkInitiator(userId, event.getInitiator().getId(),
+                "Принимать и отклонять заявки на участие в событии может только его инициатор");
+        EventRequestStatus newStatus = EventRequestStatus.valueOf(request.getStatus().toUpperCase());
+
+        List<Request> eventRequest = requestRepository.findByIdIn(request.getRequestIds());
+        int participantAmount = event.getParticipantAmount();
+        boolean limit = false;
+        for (Request req : eventRequest) {
+            if (!req.getStatus().equals(EventRequestStatus.PENDING)) {
+                throw new ConditionsNotMetException("Можно изменять статус только у заявок, " +
+                        "находящихся в режиме ожидания");
+            }
+            if (newStatus.equals(EventRequestStatus.CONFIRMED)
+                    && event.getParticipantLimit() <  participantAmount + 1) {
+                newStatus = EventRequestStatus.REJECTED;
+                limit = true;
+            }
+            req.setStatus(newStatus);
+        }
+
+        List<Request> eventRequests = requestRepository.saveAll(eventRequest);
+        List<ParticipationRequestDto> confirmedRequests = eventRequests.stream()
+                .filter(r -> r.getStatus().equals(EventRequestStatus.CONFIRMED))
+                .map(RequestMapper::toDto)
+                .toList();
+        List<ParticipationRequestDto> rejectedRequests = eventRequests.stream()
+                .filter(r -> r.getStatus().equals(EventRequestStatus.REJECTED))
+                .map(RequestMapper::toDto)
+                .toList();
+        if (limit) throw new ConditionsNotMetException("Достигнут лимит участников для мероприятия");
+        return new EventRequestStatusUpdateResult(confirmedRequests, rejectedRequests);
     }
 
     private Event searchEvent(Long eventId) {

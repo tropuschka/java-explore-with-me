@@ -2,6 +2,8 @@ package ru.practicum.events.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import ru.practicum.events.dto.*;
+import ru.practicum.events.dto.participation.EventRequestStatusUpdateRequest;
+import ru.practicum.events.dto.participation.EventRequestStatusUpdateResult;
 import ru.practicum.events.dto.participation.ParticipationRequestDto;
 import ru.practicum.events.model.Event;
 
@@ -28,4 +30,6 @@ public interface EventService {
     EventFullDto userEventUpdate(Long userId, Long eventId, UpdateEventUserRequest updateEventUserRequest);
 
     List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId);
+
+    EventRequestStatusUpdateResult updateRequestStatus(Long userId, Long eventId, EventRequestStatusUpdateRequest request);
 }
