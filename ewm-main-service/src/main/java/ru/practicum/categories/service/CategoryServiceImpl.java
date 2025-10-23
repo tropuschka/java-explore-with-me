@@ -5,9 +5,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.categories.dto.CategoryDto;
+import ru.practicum.categories.dto.NewCategoryDto;
 import ru.practicum.categories.mapping.CategoryMapper;
 import ru.practicum.categories.model.Category;
 import ru.practicum.categories.repository.CategoryRepository;
+import ru.practicum.exceptions.ConditionsNotMetException;
 import ru.practicum.exceptions.NotFoundException;
 
 import java.util.List;
@@ -29,5 +31,14 @@ public class CategoryServiceImpl implements CategoryService {
         Optional<Category> category = categoryRepository.findById(catId);
         if (category.isEmpty()) throw new NotFoundException("Категория не найдена");
         return CategoryMapper.toDto(category.get());
+    }
+
+    @Override
+    public CategoryDto addCategory(NewCategoryDto newCategoryDto) {
+        Category category = CategoryMapper.toCategory(newCategoryDto);
+        Optional<Category> checkUniqueName = categoryRepository.findByName(category.getName());
+        if (checkUniqueName.isPresent()) throw new ConditionsNotMetException("Такая категория уже добавлена");
+        Category saved = categoryRepository.save(category);
+        return CategoryMapper.toDto(saved);
     }
 }
