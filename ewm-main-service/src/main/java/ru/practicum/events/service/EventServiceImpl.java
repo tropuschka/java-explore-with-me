@@ -20,6 +20,8 @@ import ru.practicum.events.status.StateAction;
 import ru.practicum.exceptions.ConditionsNotMetException;
 import ru.practicum.client.StatClient;
 import ru.practicum.exceptions.NotFoundException;
+import ru.practicum.users.model.User;
+import ru.practicum.users.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -35,6 +37,7 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
+    private final UserRepository userRepository;
     private final StatClient statClient;
 
     @Override
@@ -183,6 +186,13 @@ public class EventServiceImpl implements EventService {
         return EventMapper.toFullDto(saved);
     }
 
+    @Override
+    public List<EventShortDto> getUserEvents(Long userId) {
+        checkUser(userId);
+        List<Event> events = eventRepository.findByInitiatorId(userId);
+        return events.stream().map(EventMapper::toShortDto).toList();
+    }
+
     private Event searchEvent(Long eventId) {
         Optional<Event> event = eventRepository.findById(eventId);
         if (event.isEmpty()) throw new NotFoundException("Событие не найдено");
@@ -214,5 +224,10 @@ public class EventServiceImpl implements EventService {
         Optional<Category> category = categoryRepository.findById(categoryId);
         if (category.isEmpty()) throw new NotFoundException("Категория не найдена");
         return category.get();
+    }
+
+    private void checkUser(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) throw new NotFoundException("Пользователь не найден");
     }
 }

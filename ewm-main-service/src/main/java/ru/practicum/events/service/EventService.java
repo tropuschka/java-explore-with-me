@@ -18,4 +18,6 @@ public interface EventService {
                                    String rangeEnd, int from, int size);
 
     EventFullDto adminEventUpdate(Long eventId, UpdateEventAdminRequest eventAdminRequest);
+
+    List<EventShortDto> getUserEvents(Long userId);
 }
