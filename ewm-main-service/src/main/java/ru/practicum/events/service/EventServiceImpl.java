@@ -8,6 +8,7 @@ import ru.practicum.categories.model.Category;
 import ru.practicum.categories.repository.CategoryRepository;
 import ru.practicum.events.dto.EventFullDto;
 import ru.practicum.events.dto.EventShortDto;
+import ru.practicum.events.dto.NewEventDto;
 import ru.practicum.events.dto.UpdateEventAdminRequest;
 import ru.practicum.events.mapping.EventMapper;
 import ru.practicum.events.model.Event;
@@ -193,6 +194,25 @@ public class EventServiceImpl implements EventService {
         return events.stream().map(EventMapper::toShortDto).toList();
     }
 
+    @Override
+    public EventFullDto createEvent(Long userId, NewEventDto newEventDto) {
+        User user = checkUser(userId);
+        Event event = EventMapper.toEvent(newEventDto);
+        if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+            throw new ConditionsNotMetException("Событие должно начинаться не ранее, " +
+                    "чем через два часа после создания");
+        }
+
+        if (newEventDto.getCategory() != null) {
+            Category category = searchCategory(newEventDto.getCategory());
+            event.setCategory(category);
+        }
+        event.setInitiator(user);
+
+        Event saved = eventRepository.save(event);
+        return EventMapper.toFullDto(saved);
+    }
+
     private Event searchEvent(Long eventId) {
         Optional<Event> event = eventRepository.findById(eventId);
         if (event.isEmpty()) throw new NotFoundException("Событие не найдено");
@@ -226,8 +246,9 @@ public class EventServiceImpl implements EventService {
         return category.get();
     }
 
-    private void checkUser(Long userId) {
+    private User checkUser(Long userId) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) throw new NotFoundException("Пользователь не найден");
+        return user.get();
     }
 }
