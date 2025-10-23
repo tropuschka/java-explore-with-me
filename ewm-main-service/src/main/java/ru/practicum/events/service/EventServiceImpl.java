@@ -7,11 +7,15 @@ import org.springframework.stereotype.Service;
 import ru.practicum.categories.model.Category;
 import ru.practicum.categories.repository.CategoryRepository;
 import ru.practicum.events.dto.*;
+import ru.practicum.events.dto.participation.ParticipationRequestDto;
 import ru.practicum.events.mapping.EventMapper;
+import ru.practicum.events.mapping.RequestMapper;
 import ru.practicum.events.model.Event;
 import ru.practicum.events.model.Location;
+import ru.practicum.events.model.Request;
 import ru.practicum.events.repository.EventRepository;
 import ru.practicum.events.repository.LocationRepository;
+import ru.practicum.events.repository.RequestRepository;
 import ru.practicum.events.status.EventSort;
 import ru.practicum.events.status.EventState;
 import ru.practicum.events.status.StateAction;
@@ -36,6 +40,7 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
     private final UserRepository userRepository;
+    private final RequestRepository requestRepository;
     private final StatClient statClient;
 
     @Override
@@ -203,7 +208,6 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getUserEventById(Long userId, Long eventId) {
-        checkUser(userId);
         Event event = searchEvent(eventId);
         checkInitiator(userId, event.getInitiator().getId(),
                 "Просматривать полную информацию о событии может только его инициатор");
@@ -212,7 +216,6 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto userEventUpdate(Long userId, Long eventId, UpdateEventUserRequest updateRequest) {
-        checkUser(userId);
         Event event = searchEvent(eventId);
         checkInitiator(userId, event.getInitiator().getId(), "Изменять событие может только его инициатор");
         if (event.getState().equals(EventState.PUBLISHED)) {
@@ -257,6 +260,15 @@ public class EventServiceImpl implements EventService {
         return EventMapper.toFullDto(saved);
     }
 
+    @Override
+    public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
+        Event event = searchEvent(eventId);
+        checkInitiator(userId, event.getInitiator().getId(),
+                "Просматривать заявки на участие в событии может только его инициатор");
+        List<Request> requests = requestRepository.findByEventId(eventId);
+        return requests.stream().map(RequestMapper::toDto).toList();
+    }
+
     private Event searchEvent(Long eventId) {
         Optional<Event> event = eventRepository.findById(eventId);
         if (event.isEmpty()) throw new NotFoundException("Событие не найдено");
@@ -297,6 +309,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private void checkInitiator(Long userId, Long initiatorId, String msg) {
+        checkUser(userId);
         if (!initiatorId.equals(userId)) {
             throw new ConditionsNotMetException(msg);
         }
