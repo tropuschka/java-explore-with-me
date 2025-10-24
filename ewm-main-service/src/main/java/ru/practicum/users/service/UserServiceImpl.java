@@ -50,11 +50,11 @@ public class UserServiceImpl implements UserService {
 
     private void checkUser(Long userId) {
         Optional<User> check = userRepository.findById(userId);
-        if (check.isEmpty()) throw new NotFoundException("Пользователь не найден");
+        if (check.isEmpty()) throw new NotFoundException("Пользователь с ID " + userId + " не найден");
     }
 
     private void checkAdmin(Long userId) {
         Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty()) throw new NotFoundException("Пользователь не найден");
+        if (user.isEmpty()) throw new NotFoundException("Пользователь с ID " + userId + " не найден");
     }
 }

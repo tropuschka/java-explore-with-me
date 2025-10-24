@@ -30,10 +30,7 @@ import ru.practicum.users.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static ru.practicum.events.model.Event.timeFormat;
 
@@ -65,10 +62,7 @@ public class EventServiceImpl implements EventService {
                     .toList();
         }
         if (categories != null && !categories.isEmpty()) {
-            events = events.stream()
-                    .filter(e -> e.getCategory() != null)
-                    .filter(e -> categories.contains(e.getCategory().getId()))
-                    .toList();
+            events = filterCategories(events, categories);
         }
         if (paid != null) {
             events = events.stream()
@@ -85,7 +79,8 @@ public class EventServiceImpl implements EventService {
         try {
             sortEnum = EventSort.valueOf(sort.toUpperCase());
         } catch (Exception e) {
-            throw new ConditionsNotMetException("Некорректная сортировка");
+            throw new ConditionsNotMetException("Некорректная сортировка. " +
+                    "События можно сортировать по дате или по количеству просмотров");
         }
         if (sortEnum.equals(EventSort.EVENT_DATE)) {
             events = events.stream()
@@ -108,7 +103,9 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto getEvent(Long eventId, HttpServletRequest httpServletRequest) {
         Event event = searchEvent(eventId);
-        if (event.getPublished() == null) throw new ConditionsNotMetException("Событие недоступно");
+        if (!event.getState().equals(EventState.PUBLISHED)) {
+            throw new ConditionsNotMetException("Событие с ID " + eventId + " недоступно");
+        }
         statClient.saveStat(httpServletRequest, "events/get");
         return EventMapper.toFullDto(event);
     }
@@ -131,10 +128,7 @@ public class EventServiceImpl implements EventService {
                     .toList();
         }
         if (categories != null && !categories.isEmpty()) {
-            events = events.stream()
-                    .filter(e -> e.getCategory() != null)
-                    .filter(e -> categories.contains(e.getCategory().getId()))
-                    .toList();
+            events = filterCategories(events, categories);
         }
 
         List<EventFullDto> searchList = new ArrayList<>();
@@ -171,7 +165,7 @@ public class EventServiceImpl implements EventService {
             StateAction stateAction = StateAction.valueOf(updateRequest.getStateAction().toUpperCase());
             if (stateAction.equals(StateAction.PUBLISH_EVENT)) {
                 if (!event.getState().equals(EventState.PENDING)) {
-                    throw new ConditionsNotMetException("Событие отменено или уже опубликовано");
+                    throw new ConditionsNotMetException("Событие с ID " + eventId + " отменено или уже опубликовано");
                 }
                 event.setPublished(LocalDateTime.now());
                 event.setState(EventState.PUBLISHED);
@@ -204,8 +198,7 @@ public class EventServiceImpl implements EventService {
         checkEventDate(event.getEventDate());
 
         if (newEventDto.getCategory() != null) {
-            Category category = searchCategory(newEventDto.getCategory());
-            event.setCategory(category);
+            event.setCategory(searchCategory(newEventDto.getCategory()));
         }
         event.setInitiator(user);
 
@@ -316,7 +309,7 @@ public class EventServiceImpl implements EventService {
 
     private Event searchEvent(Long eventId) {
         Optional<Event> event = eventRepository.findById(eventId);
-        if (event.isEmpty()) throw new NotFoundException("Событие не найдено");
+        if (event.isEmpty()) throw new NotFoundException("Событие с ID " + eventId + " не найдено");
         return event.get();
     }
 
@@ -343,14 +336,14 @@ public class EventServiceImpl implements EventService {
 
     private Category searchCategory(Long categoryId) {
         Optional<Category> category = categoryRepository.findById(categoryId);
-        if (category.isEmpty()) throw new NotFoundException("Категория не найдена");
+        if (category.isEmpty()) throw new NotFoundException("Категория с ID " + categoryId + " не найдена");
         return category.get();
     }
 
     private User checkUser(Long userId, Long headerId) {
         if (!userId.equals(headerId)) throw new ConditionsNotMetException("Доступ запрещен");
         Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty()) throw new NotFoundException("Пользователь не найден");
+        if (user.isEmpty()) throw new NotFoundException("Пользователь с ID " + userId + " не найден");
         return user.get();
     }
 
@@ -376,12 +369,21 @@ public class EventServiceImpl implements EventService {
         }
     }
 
+    // Пока, если локация не существует, просто добавляется новая
     private Location checkLocation(LocationDto locationDto) {
-        return locationRepository.findByLatAndLon(locationDto.getLat(), locationDto.getLon());
+        Optional<Location> location = locationRepository.findByLatAndLon(locationDto.getLat(), locationDto.getLon());
+        return location.orElseGet(() -> locationRepository.save(EventMapper.toLocation(locationDto)));
     }
 
     private void checkAdmin(Long userId) {
         Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty()) throw new NotFoundException("Пользователь не найден");
+        if (user.isEmpty()) throw new NotFoundException("Пользователь с ID " + userId + " не найден");
+    }
+
+    private List<Event> filterCategories(List<Event> events, List<Long> categories) {
+        return events.stream()
+                .filter(e -> e.getCategory() != null)
+                .filter(e -> categories.contains(e.getCategory().getId()))
+                .toList();
     }
 }

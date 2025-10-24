@@ -83,7 +83,7 @@ public class CompilationServiceImpl implements CompilationService {
     private Compilation findCompilation(Long id) {
         Optional<Compilation> check = compilationRepository.findById(id);
         if (check.isPresent()) return check.get();
-        else throw new NotFoundException("Подборка не найдена");
+        else throw new NotFoundException("Подборка с ID " + id + " не найдена");
     }
 
     private List<Event> checkEvents(Set<Long> events) {
@@ -96,6 +96,6 @@ public class CompilationServiceImpl implements CompilationService {
 
     private void checkAdmin(Long userId) {
         Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty()) throw new NotFoundException("Пользователь не найден");
+        if (user.isEmpty()) throw new NotFoundException("Пользователь с ID " + userId + " не найден");
     }
 }

@@ -35,7 +35,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto getCategoryById(Long catId) {
         Optional<Category> category = categoryRepository.findById(catId);
-        if (category.isEmpty()) throw new NotFoundException("Категория не найдена");
+        if (category.isEmpty()) throw new NotFoundException("Категория с id " + catId + " не найдена");
         return CategoryMapper.toDto(category.get());
     }
 
@@ -44,7 +44,9 @@ public class CategoryServiceImpl implements CategoryService {
         checkAdmin(adminId);
         Category category = CategoryMapper.toCategory(newCategoryDto);
         Optional<Category> checkUniqueName = categoryRepository.findByName(category.getName());
-        if (checkUniqueName.isPresent()) throw new ConditionsNotMetException("Такая категория уже добавлена");
+        if (checkUniqueName.isPresent()) {
+            throw new ConditionsNotMetException("Категория \"" + category.getName() + "\" уже добавлена");
+        }
         Category saved = categoryRepository.save(category);
         return CategoryMapper.toDto(saved);
     }
@@ -52,8 +54,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public void deleteCategory(Long adminId, Long catId) {
         checkAdmin(adminId);
-        Optional<Category> category = categoryRepository.findById(catId);
-        if (category.isEmpty()) throw new NotFoundException("Категория не найдена");
+        checkCategory(catId);
         List<Event> categoryEvents = eventRepository.findByCategoryId(catId);
         if (!categoryEvents.isEmpty()) {
             throw new ConditionsNotMetException("Нельзя удалить категорию, в которой есть события");
@@ -64,14 +65,12 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto updateCategory(Long adminId, Long catId, NewCategoryDto newCategoryDto) {
         checkAdmin(adminId);
-        Optional<Category> categoryOpt = categoryRepository.findById(catId);
-        if (categoryOpt.isEmpty()) throw new NotFoundException("Категория не найдена");
         Optional<Category> checkUnique = categoryRepository.findByName(newCategoryDto.getName());
         if (checkUnique.isPresent() && !checkUnique.get().getId().equals(catId)) {
-            throw new ConditionsNotMetException("Такая категория уже добавлена");
+            throw new ConditionsNotMetException("Категория \"" + newCategoryDto.getName() + "\" уже добавлена");
         }
 
-        Category category = categoryOpt.get();
+        Category category = checkCategory(catId);
         category.setName(newCategoryDto.getName());
         Category saved = categoryRepository.save(category);
         return CategoryMapper.toDto(saved);
@@ -81,5 +80,11 @@ public class CategoryServiceImpl implements CategoryService {
     private void checkAdmin(Long userId) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) throw new NotFoundException("Пользователь не найден");
+    }
+
+    private Category checkCategory(Long catId) {
+        Optional<Category> categoryOpt = categoryRepository.findById(catId);
+        if (categoryOpt.isEmpty()) throw new NotFoundException("Категория не найдена");
+        return categoryOpt.get();
     }
 }

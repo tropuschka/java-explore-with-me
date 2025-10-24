@@ -39,7 +39,10 @@ public class RequestServiceImpl implements RequestService {
         Event event = checkEvent(eventId);
         checkInitiator(userId, event);
         Optional<Request> check = checkRequest(userId, eventId);
-        if (check.isPresent()) throw new DuplicationException("Запрос уже создан");
+        if (check.isPresent()) {
+            throw new DuplicationException("Запрос на мероприятие с ID " + eventId + " от пользователя с ID " + userId
+                    + " уже создан");
+        }
         Request request = new Request(null, eventId, userId, EventRequestStatus.PENDING, LocalDateTime.now());
         if (!event.isRequestModeration() || event.getParticipantLimit() == 0) {
             request.setStatus(EventRequestStatus.CONFIRMED);
@@ -60,18 +63,18 @@ public class RequestServiceImpl implements RequestService {
     private void checkUser(Long userId, Long headerId) {
         if (!userId.equals(headerId)) throw new ConditionsNotMetException("Доступ запрещен");
         Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty()) throw new NotFoundException("Пользователь не найден");
+        if (user.isEmpty()) throw new NotFoundException("Пользователь с ID " + userId + " не найден");
     }
 
     private Event checkEvent(Long eventId) {
         Optional<Event> optEvent = eventRepository.findById(eventId);
-        if (optEvent.isEmpty()) throw new NotFoundException("Событие не найдено");
+        if (optEvent.isEmpty()) throw new NotFoundException("Событие с ID " + eventId + " не найдено");
         Event event = optEvent.get();
         if (event.getEventDate() == null) {
-            throw new ConditionsNotMetException("Событие недоступно");
+            throw new ConditionsNotMetException("Событие с ID " + eventId + " недоступно");
         }
         if (event.getParticipantAmount() + 1 > event.getParticipantLimit()) {
-            throw new ConditionsNotMetException("Мест на мероприятии больше нет");
+            throw new ConditionsNotMetException("Мест на мероприятии с ID " + eventId + " больше нет");
         }
         return event;
     }
@@ -82,7 +85,7 @@ public class RequestServiceImpl implements RequestService {
 
     private Request checkRequest(Long requestId) {
         Optional<Request> request = requestRepository.findById(requestId);
-        if (request.isEmpty()) throw new NotFoundException("Запрос не найден");
+        if (request.isEmpty()) throw new NotFoundException("Запрос с ID " + requestId + " не найден");
         return request.get();
     }
 
