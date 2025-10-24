@@ -9,9 +9,7 @@ import ru.practicum.events.model.Request;
 import ru.practicum.events.repository.EventRepository;
 import ru.practicum.events.repository.RequestRepository;
 import ru.practicum.events.status.EventRequestStatus;
-import ru.practicum.exceptions.ConditionsNotMetException;
-import ru.practicum.exceptions.DuplicationException;
-import ru.practicum.exceptions.NotFoundException;
+import ru.practicum.exceptions.*;
 import ru.practicum.users.model.User;
 import ru.practicum.users.repository.UserRepository;
 
@@ -40,7 +38,7 @@ public class RequestServiceImpl implements RequestService {
         checkInitiator(userId, event);
         Optional<Request> check = checkRequest(userId, eventId);
         if (check.isPresent()) {
-            throw new DuplicationException("Запрос на мероприятие с ID " + eventId + " от пользователя с ID " + userId
+            throw new ConflictException("Запрос на мероприятие с ID " + eventId + " от пользователя с ID " + userId
                     + " уже создан");
         }
         Request request = new Request(null, eventId, userId, EventRequestStatus.PENDING, LocalDateTime.now());
@@ -61,7 +59,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private void checkUser(Long userId, Long headerId) {
-        if (!userId.equals(headerId)) throw new ConditionsNotMetException("Доступ запрещен");
+        if (!userId.equals(headerId)) throw new ForbiddenException("Доступ запрещен");
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) throw new NotFoundException("Пользователь с ID " + userId + " не найден");
     }
@@ -71,10 +69,10 @@ public class RequestServiceImpl implements RequestService {
         if (optEvent.isEmpty()) throw new NotFoundException("Событие с ID " + eventId + " не найдено");
         Event event = optEvent.get();
         if (event.getEventDate() == null) {
-            throw new ConditionsNotMetException("Событие с ID " + eventId + " недоступно");
+            throw new ForbiddenException("Событие с ID " + eventId + " недоступно");
         }
         if (event.getParticipantAmount() + 1 > event.getParticipantLimit()) {
-            throw new ConditionsNotMetException("Мест на мероприятии с ID " + eventId + " больше нет");
+            throw new ConflictException("Мест на мероприятии с ID " + eventId + " больше нет");
         }
         return event;
     }
@@ -92,7 +90,7 @@ public class RequestServiceImpl implements RequestService {
     private void checkInitiator(Long userId, Event event) {
         User initiator = event.getInitiator();
         if (initiator.getId().equals(userId)) {
-            throw new ConditionsNotMetException("Пользователь является инициатором события");
+            throw new BadRequestException("Пользователь является инициатором события");
         }
     }
 }

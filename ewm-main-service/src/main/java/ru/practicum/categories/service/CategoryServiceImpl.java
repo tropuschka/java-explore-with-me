@@ -11,8 +11,7 @@ import ru.practicum.categories.model.Category;
 import ru.practicum.categories.repository.CategoryRepository;
 import ru.practicum.events.model.Event;
 import ru.practicum.events.repository.EventRepository;
-import ru.practicum.exceptions.ConditionsNotMetException;
-import ru.practicum.exceptions.NotFoundException;
+import ru.practicum.exceptions.*;
 import ru.practicum.users.model.User;
 import ru.practicum.users.repository.UserRepository;
 
@@ -34,8 +33,11 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto getCategoryById(Long catId) {
+        ApiError apiError;
         Optional<Category> category = categoryRepository.findById(catId);
-        if (category.isEmpty()) throw new NotFoundException("Категория с id " + catId + " не найдена");
+        if (category.isEmpty()) {
+            throw new NotFoundException("Категория с id " + catId + " не найдена");
+        }
         return CategoryMapper.toDto(category.get());
     }
 
@@ -45,7 +47,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = CategoryMapper.toCategory(newCategoryDto);
         Optional<Category> checkUniqueName = categoryRepository.findByName(category.getName());
         if (checkUniqueName.isPresent()) {
-            throw new ConditionsNotMetException("Категория \"" + category.getName() + "\" уже добавлена");
+            throw new ConflictException("Категория \"" + category.getName() + "\" уже добавлена");
         }
         Category saved = categoryRepository.save(category);
         return CategoryMapper.toDto(saved);
@@ -57,7 +59,7 @@ public class CategoryServiceImpl implements CategoryService {
         checkCategory(catId);
         List<Event> categoryEvents = eventRepository.findByCategoryId(catId);
         if (!categoryEvents.isEmpty()) {
-            throw new ConditionsNotMetException("Нельзя удалить категорию, в которой есть события");
+            throw new ConflictException("Нельзя удалить категорию, в которой есть события");
         }
         categoryRepository.deleteById(catId);
     }
@@ -67,7 +69,7 @@ public class CategoryServiceImpl implements CategoryService {
         checkAdmin(adminId);
         Optional<Category> checkUnique = categoryRepository.findByName(newCategoryDto.getName());
         if (checkUnique.isPresent() && !checkUnique.get().getId().equals(catId)) {
-            throw new ConditionsNotMetException("Категория \"" + newCategoryDto.getName() + "\" уже добавлена");
+            throw new ConflictException("Категория \"" + newCategoryDto.getName() + "\" уже добавлена");
         }
 
         Category category = checkCategory(catId);

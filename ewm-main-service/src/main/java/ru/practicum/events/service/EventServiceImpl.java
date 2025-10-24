@@ -2,6 +2,7 @@ package ru.practicum.events.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ru.practicum.categories.model.Category;
@@ -22,9 +23,8 @@ import ru.practicum.events.status.EventRequestStatus;
 import ru.practicum.events.status.EventSort;
 import ru.practicum.events.status.EventState;
 import ru.practicum.events.status.StateAction;
-import ru.practicum.exceptions.ConditionsNotMetException;
+import ru.practicum.exceptions.*;
 import ru.practicum.client.StatClient;
-import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.users.model.User;
 import ru.practicum.users.repository.UserRepository;
 
@@ -36,6 +36,7 @@ import static ru.practicum.events.model.Event.timeFormat;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EventServiceImpl implements EventService {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(timeFormat);
     private final EventRepository eventRepository;
@@ -79,7 +80,7 @@ public class EventServiceImpl implements EventService {
         try {
             sortEnum = EventSort.valueOf(sort.toUpperCase());
         } catch (Exception e) {
-            throw new ConditionsNotMetException("Некорректная сортировка. " +
+            throw new BadRequestException("Некорректная сортировка. " +
                     "События можно сортировать по дате или по количеству просмотров");
         }
         if (sortEnum.equals(EventSort.EVENT_DATE)) {
@@ -104,7 +105,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getEvent(Long eventId, HttpServletRequest httpServletRequest) {
         Event event = searchEvent(eventId);
         if (!event.getState().equals(EventState.PUBLISHED)) {
-            throw new ConditionsNotMetException("Событие с ID " + eventId + " недоступно");
+            throw new ForbiddenException("Событие с ID " + eventId + " недоступно");
         }
         statClient.saveStat(httpServletRequest, "events/get");
         return EventMapper.toFullDto(event);
@@ -165,14 +166,14 @@ public class EventServiceImpl implements EventService {
             StateAction stateAction = StateAction.valueOf(updateRequest.getStateAction().toUpperCase());
             if (stateAction.equals(StateAction.PUBLISH_EVENT)) {
                 if (!event.getState().equals(EventState.PENDING)) {
-                    throw new ConditionsNotMetException("Событие с ID " + eventId + " отменено или уже опубликовано");
+                    throw new ConflictException("Событие с ID " + eventId + " отменено или уже опубликовано");
                 }
                 event.setPublished(LocalDateTime.now());
                 event.setState(EventState.PUBLISHED);
             }
             if (stateAction.equals(StateAction.REJECT_EVENT)) {
                 if (event.getState().equals(EventState.PUBLISHED)) {
-                    throw new ConditionsNotMetException("Нельзя отменить уже опубликованное событие");
+                    throw new ConflictException("Нельзя отменить уже опубликованное событие");
                 }
                 event.setState(EventState.CANCELLED);
             }
@@ -220,7 +221,7 @@ public class EventServiceImpl implements EventService {
         checkInitiator(userId, headerId, event.getInitiator().getId(),
                 "Изменять событие может только его инициатор");
         if (event.getState().equals(EventState.PUBLISHED)) {
-            throw new ConditionsNotMetException("Изменять можно только отмененные и ожидающие модерации события");
+            throw new ConflictException("Изменять можно только отмененные и ожидающие модерации события");
         }
 
         if (updateRequest.getAnnotation() != null && !updateRequest.getAnnotation().isBlank()) {
@@ -280,16 +281,18 @@ public class EventServiceImpl implements EventService {
 
         List<Request> eventRequest = requestRepository.findByIdIn(request.getRequestIds());
         int participantAmount = event.getParticipantAmount();
-        boolean limit = false;
+        ArrayList<String> errors = new ArrayList<>();
         for (Request req : eventRequest) {
             if (!req.getStatus().equals(EventRequestStatus.PENDING)) {
-                throw new ConditionsNotMetException("Можно изменять статус только у заявок, " +
+                throw new ConflictException("Можно изменять статус только у заявок, " +
                         "находящихся в режиме ожидания");
             }
             if (newStatus.equals(EventRequestStatus.CONFIRMED)
                     && event.getParticipantLimit() <  participantAmount + 1) {
                 newStatus = EventRequestStatus.REJECTED;
-                limit = true;
+                String msg = "Заявка с ID " + req.getId() + " отклонена";
+                log.error(msg);
+                errors.add(msg);
             }
             req.setStatus(newStatus);
         }
@@ -303,7 +306,7 @@ public class EventServiceImpl implements EventService {
                 .filter(r -> r.getStatus().equals(EventRequestStatus.REJECTED))
                 .map(RequestMapper::toDto)
                 .toList();
-        if (limit) throw new ConditionsNotMetException("Достигнут лимит участников для мероприятия");
+        if (!errors.isEmpty()) throw new ConflictException("Достигнут лимит участников для мероприятия");
         return new EventRequestStatusUpdateResult(confirmedRequests, rejectedRequests);
     }
 
@@ -341,7 +344,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private User checkUser(Long userId, Long headerId) {
-        if (!userId.equals(headerId)) throw new ConditionsNotMetException("Доступ запрещен");
+        if (!userId.equals(headerId)) throw new ForbiddenException("Доступ запрещен");
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) throw new NotFoundException("Пользователь с ID " + userId + " не найден");
         return user.get();
@@ -350,21 +353,21 @@ public class EventServiceImpl implements EventService {
     private void checkInitiator(Long userId, Long headerId, Long initiatorId, String msg) {
         checkUser(userId, headerId);
         if (!initiatorId.equals(userId)) {
-            throw new ConditionsNotMetException(msg);
+            throw new ForbiddenException(msg);
         }
     }
 
     private LocalDateTime checkEventDate(String eventDateString, LocalDateTime published) {
         LocalDateTime newEventDate = LocalDateTime.parse(eventDateString, formatter);
         if (published != null && newEventDate.isBefore(published.minusHours(1))) {
-            throw new ConditionsNotMetException("Событие должно начинаться не раньше, чем за час до публикации");
+            throw new BadRequestException("Событие должно начинаться не раньше, чем за час до публикации");
         }
         return newEventDate;
     }
 
     private void checkEventDate(LocalDateTime eventDate) {
         if (eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ConditionsNotMetException("Событие должно начинаться не ранее, " +
+            throw new BadRequestException("Событие должно начинаться не ранее, " +
                     "чем через два часа после создания");
         }
     }
