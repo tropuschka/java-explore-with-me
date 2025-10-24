@@ -8,11 +8,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
-    Page<Event> findAllAndEventDateIsAfterAndEventDateIsBefore(LocalDateTime start, LocalDateTime end);
+    List<Event> findByEventDateIsAfterAndEventDateIsBefore(LocalDateTime start, LocalDateTime end);
 
-    Page<Event> findAllAndEventDateIsAfter(LocalDateTime start);
+    List<Event> findByEventDateIsAfter(LocalDateTime start);
 
-    Page<Event> findAllAndEventDateIsBefore(LocalDateTime end);
+    List<Event> findByEventDateIsBefore(LocalDateTime end);
 
     List<Event> findByInitiatorId(Long userId);
 

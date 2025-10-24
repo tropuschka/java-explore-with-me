@@ -19,13 +19,11 @@ import java.util.Objects;
 
 @Component
 public class StatClient {
-
-    @Value("${stats-service.url}")
-    private String path;
     private final RestTemplate restTemplate;
     private static final String timeFormat = "yyyy-MM-dd HH:mm:ss";
 
-    public StatClient() {
+    // Иначе не работает :)
+    public StatClient(@Value("${stats-server.url:http://localhost:9090}") String path) {
         this.restTemplate = new RestTemplateBuilder()
                 .uriTemplateHandler(new DefaultUriBuilderFactory(path))
                 .requestFactory(() -> new HttpComponentsClientHttpRequestFactory())
@@ -35,7 +33,7 @@ public class StatClient {
     public void saveStat(HttpServletRequest request, String application) {
         StatDto statDto = new StatDto(null, application, request.getRemoteAddr(), request.getRequestURI(),
                 LocalDateTime.now().toString());
-        restTemplate.postForLocation(path + "/hit", statDto);
+        restTemplate.postForLocation("/hit", statDto);
     }
 
     public List<ResponseStatDto> getViewStats(LocalDateTime start, LocalDateTime end,
@@ -44,7 +42,7 @@ public class StatClient {
         String formattedEnd = DateTimeFormatter.ofPattern(timeFormat).format(end);
 
         ResponseEntity<ResponseStatDto[]> responseResult = restTemplate.getForEntity(
-                path + "/stats" + "?start=" + formattedStart + "&end=" + formattedEnd +
+                "/stats" + "?start=" + formattedStart + "&end=" + formattedEnd +
                         "&uris=" + String.join(",", uris) + "&unique=" + unique,
                 ResponseStatDto[].class);
 

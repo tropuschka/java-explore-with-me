@@ -326,13 +326,13 @@ public class EventServiceImpl implements EventService {
         if (rangeEnd != null) searchEnd = LocalDateTime.parse(rangeEnd, formatter);
 
 
-        Page<Event> searchEvent;
+        List<Event> searchEvent;
         if (searchStart != null && searchEnd != null) {
-            searchEvent = eventRepository.findAllAndEventDateIsAfterAndEventDateIsBefore(searchStart, searchEnd);
+            searchEvent = eventRepository.findByEventDateIsAfterAndEventDateIsBefore(searchStart, searchEnd);
         } else if (searchStart != null) {
-            searchEvent = eventRepository.findAllAndEventDateIsAfter(searchStart);
+            searchEvent = eventRepository.findByEventDateIsAfter(searchStart);
         } else {
-            searchEvent = eventRepository.findAllAndEventDateIsBefore(searchEnd);
+            searchEvent = eventRepository.findByEventDateIsBefore(searchEnd);
         }
         return searchEvent.stream().toList();
     }
