@@ -10,12 +10,13 @@ import ru.practicum.categories.dto.CategoryDto;
 import ru.practicum.categories.dto.NewCategoryDto;
 import ru.practicum.categories.service.CategoryService;
 
+import static ru.practicum.users.controllers.AdminUserController.userIdHeader;
+
 @RestController
 @RequestMapping("/admin/categories")
 @Validated
 public class AdminCategoryController {
     private final CategoryService categoryService;
-    private final String userIdHeader = "X-Sharer-User-Id";
 
     @Autowired
     public AdminCategoryController(CategoryService categoryService) {

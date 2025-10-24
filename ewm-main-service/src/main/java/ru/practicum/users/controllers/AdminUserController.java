@@ -18,7 +18,7 @@ import java.util.List;
 @Validated
 public class AdminUserController {
     private final UserService userService;
-    private final String userIdHeader = "X-Sharer-User-Id";
+    public static final String userIdHeader = "X-Sharer-User-Id";
 
     @Autowired
     public AdminUserController(UserService userService) {

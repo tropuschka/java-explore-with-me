@@ -35,10 +35,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+import static ru.practicum.events.model.Event.timeFormat;
+
 @Service
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(timeFormat);
     private final EventRepository eventRepository;
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;

@@ -11,12 +11,13 @@ import ru.practicum.compilations.dto.NewCompilationDto;
 import ru.practicum.compilations.dto.UpdateCompilationRequest;
 import ru.practicum.compilations.service.CompilationService;
 
+import static ru.practicum.users.controllers.AdminUserController.userIdHeader;
+
 @RestController
 @RequestMapping(path = "/admin/compilations")
 @Validated
 public class AdminCompilationsController {
     private final CompilationService compilationService;
-    private final String userIdHeader = "X-Sharer-User-Id";
 
     @Autowired
     public AdminCompilationsController(CompilationService compilationService) {

@@ -18,12 +18,13 @@ import ru.practicum.events.service.EventService;
 
 import java.util.List;
 
+import static ru.practicum.users.controllers.AdminUserController.userIdHeader;
+
 @RestController
 @RequestMapping(path = "/users/{userId}/events")
 @Validated
 public class PrivateEventController {
     private final EventService eventService;
-    private final String userIdHeader = "X-Sharer-User-Id";
 
     @Autowired
     public PrivateEventController(EventService eventService) {

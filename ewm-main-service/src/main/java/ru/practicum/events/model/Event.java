@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Table(name = "event")
 public class Event {
+    public static String timeFormat = "yyyy-MM-dd HH:mm:ss";
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)

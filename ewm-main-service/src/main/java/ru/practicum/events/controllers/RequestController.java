@@ -10,12 +10,13 @@ import ru.practicum.events.service.RequestService;
 
 import java.util.List;
 
+import static ru.practicum.users.controllers.AdminUserController.userIdHeader;
+
 @RestController
 @RequestMapping(path = "/users/{userId}/requests")
 @Validated
 public class RequestController {
     private final RequestService requestService;
-    private final String userIdHeader = "X-Sharer-User-Id";
 
     @Autowired
     public RequestController (RequestService requestService) {

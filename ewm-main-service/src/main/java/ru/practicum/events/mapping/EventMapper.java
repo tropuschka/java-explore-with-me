@@ -14,8 +14,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 
+import static ru.practicum.events.model.Event.timeFormat;
+
 public class EventMapper {
-    private final static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final static DateTimeFormatter formatter = DateTimeFormatter.ofPattern(timeFormat);
 
     public static EventShortDto toShortDto(Event event) {
         return new EventShortDto(event.getAnnotation(), CategoryMapper.toDto(event.getCategory()),
