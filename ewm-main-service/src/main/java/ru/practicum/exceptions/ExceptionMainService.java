@@ -32,7 +32,7 @@ public class ExceptionMainService {
     }
 
     @ExceptionHandler(value = ForbiddenException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse throwForbidden(final ForbiddenException e) {
         log.error(e.getMessage());
         return ErrorResponse.create(e, HttpStatus.FORBIDDEN, e.getMessage());

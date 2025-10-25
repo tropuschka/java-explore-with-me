@@ -10,6 +10,7 @@ import ru.practicum.events.status.EventState;
 import ru.practicum.users.model.User;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,8 +39,10 @@ public class Event {
     private boolean paid;
     @Column(name = "title", nullable = false)
     private String title;
-    @Column(name = "views", nullable = false)
-    private Long views;
+    @ElementCollection
+    @CollectionTable(name = "views", joinColumns = @JoinColumn(name = "event_id"))
+    @Column(name = "ip")
+    private List<String> views;
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "participation", joinColumns = @JoinColumn(name = "event_id"),
             inverseJoinColumns = @JoinColumn(name = "id"))
@@ -47,7 +50,7 @@ public class Event {
     @Column(name = "published")
     private LocalDateTime published;
     @Column(name = "participant_limit", nullable = false)
-    private int participantLimit;
+    private Integer participantLimit;
     @Column(name = "request_moderation", nullable = false)
     private boolean requestModeration;
     @Column(name = "description", nullable = false)
@@ -64,5 +67,9 @@ public class Event {
         Set<Request> approved = requests.stream()
                 .filter(r -> r.getStatus().equals(EventRequestStatus.CONFIRMED)).collect(Collectors.toSet());
         return approved.size();
+    }
+
+    public int getViewsAmount() {
+        return views.size();
     }
 }

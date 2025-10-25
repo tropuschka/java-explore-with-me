@@ -6,9 +6,9 @@ import ru.practicum.users.dto.UserDto;
 import java.util.List;
 
 public interface UserService {
-    List<UserDto> search(Long adminId, List<Long> ids, int from, int size);
+    List<UserDto> search(List<Long> ids, int from, int size);
 
-    UserDto addUser(Long adminId, NewUserRequest newUserRequest);
+    UserDto addUser(NewUserRequest newUserRequest);
 
-    void deleteUser(Long adminId, Long id);
+    void deleteUser(Long id);
 }

@@ -1,6 +1,7 @@
 package ru.practicum.events.repository;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.practicum.events.model.Event;
 
@@ -14,7 +15,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     List<Event> findByEventDateIsBefore(LocalDateTime end);
 
-    List<Event> findByInitiatorId(Long userId);
+    Page<Event> findByInitiatorId(Long userId, PageRequest pageRequest);
 
     List<Event> findByCategoryId(Long catId);
 }

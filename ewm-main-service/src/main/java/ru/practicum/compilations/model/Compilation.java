@@ -24,6 +24,6 @@ public class Compilation {
     private boolean pinned;
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "compilation_event", joinColumns = @JoinColumn(name = "compilation_id"),
-        inverseJoinColumns = @JoinColumn(name = "event_id"))
+            inverseJoinColumns = @JoinColumn(name = "event_id"))
     private Set<Event> events;
 }

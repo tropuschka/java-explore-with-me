@@ -4,5 +4,5 @@ public enum EventRequestStatus {
     CONFIRMED,
     REJECTED,
     PENDING,
-    CANCELLED
+    CANCELED
 }

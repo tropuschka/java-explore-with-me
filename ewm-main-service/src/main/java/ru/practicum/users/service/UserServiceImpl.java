@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.practicum.exceptions.ConflictException;
 import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.users.dto.NewUserRequest;
 import ru.practicum.users.dto.UserDto;
@@ -23,27 +24,24 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
-    public List<UserDto> search(Long adminId, List<Long> ids, int from, int size) {
-        checkAdmin(adminId);
+    public List<UserDto> search(List<Long> ids, int from, int size) {
         Page<User> users;
         if (ids == null || ids.isEmpty()) {
             users = userRepository.findAll(PageRequest.of(from, size, Sort.by(ASC, "id")));
-        }
-        else users = userRepository.findByIdIn(ids, PageRequest.of(from, size, Sort.by(ASC, "id")));
+        } else users = userRepository.findByIdIn(ids, PageRequest.of(from, size, Sort.by(ASC, "id")));
         return users.stream().map(UserMapper::toDto).toList();
     }
 
     @Override
-    public UserDto addUser(Long adminId, NewUserRequest newUser) {
-        checkAdmin(adminId);
+    public UserDto addUser(NewUserRequest newUser) {
         User user = UserMapper.toUser(newUser);
+        checkEmail(user.getEmail());
         User saved = userRepository.save(user);
         return UserMapper.toDto(saved);
     }
 
     @Override
-    public void deleteUser(Long adminId, Long userId) {
-        checkAdmin(adminId);
+    public void deleteUser(Long userId) {
         checkUser(userId);
         userRepository.deleteById(userId);
     }
@@ -53,8 +51,8 @@ public class UserServiceImpl implements UserService {
         if (check.isEmpty()) throw new NotFoundException("Пользователь с ID " + userId + " не найден");
     }
 
-    private void checkAdmin(Long userId) {
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty()) throw new NotFoundException("Пользователь с ID " + userId + " не найден");
+    private void checkEmail(String email) {
+        Optional<User> check = userRepository.findByEmail(email);
+        if (check.isPresent()) throw new ConflictException("Почта " + email + " уже занята");
     }
 }

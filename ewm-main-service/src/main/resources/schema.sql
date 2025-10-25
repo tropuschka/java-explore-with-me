@@ -26,7 +26,6 @@ CREATE TABLE IF NOT EXISTS event (
     initiator bigint not null,
     paid boolean default false,
     title varchar(120) not null,
-    views bigint default 0,
     published timestamp without time zone,
     participant_limit int not null,
     request_moderation boolean not null,
@@ -38,6 +37,12 @@ CREATE TABLE IF NOT EXISTS event (
     CONSTRAINT fk_event_category FOREIGN KEY (category_id) REFERENCES category(id),
     CONSTRAINT fk_event_initiator FOREIGN KEY (initiator) REFERENCES users(id),
     CONSTRAINT fk_event_location FOREIGN KEY (location) REFERENCES location(id)
+);
+
+CREATE TABLE IF NOT EXISTS views (
+    event_id bigint not null,
+    ip varchar not null,
+    CONSTRAINT fk_views_event_id FOREIGN KEY (event_id) REFERENCES event(id)
 );
 
 CREATE TABLE IF NOT EXISTS participation (

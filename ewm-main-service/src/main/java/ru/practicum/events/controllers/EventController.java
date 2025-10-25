@@ -30,7 +30,7 @@ public class EventController {
                                                       @RequestParam(required = false) String rangeStart,
                                                       @RequestParam(required = false) String rangeEnd,
                                                       @RequestParam(defaultValue = "false") boolean onlyAvailable,
-                                                      @RequestParam String sort,
+                                                      @RequestParam(defaultValue = "ID") String sort,
                                                       @RequestParam(defaultValue = "0") int from,
                                                       @RequestParam(defaultValue = "10") int size,
                                                       HttpServletRequest httpServletRequest) {

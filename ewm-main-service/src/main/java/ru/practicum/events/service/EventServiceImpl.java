@@ -2,11 +2,12 @@ package ru.practicum.events.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.categories.model.Category;
 import ru.practicum.categories.repository.CategoryRepository;
+import ru.practicum.client.StatClient;
 import ru.practicum.events.dto.*;
 import ru.practicum.events.dto.participation.EventRequestStatusUpdateRequest;
 import ru.practicum.events.dto.participation.EventRequestStatusUpdateResult;
@@ -23,20 +24,24 @@ import ru.practicum.events.status.EventRequestStatus;
 import ru.practicum.events.status.EventSort;
 import ru.practicum.events.status.EventState;
 import ru.practicum.events.status.StateAction;
-import ru.practicum.exceptions.*;
-import ru.practicum.client.StatClient;
+import ru.practicum.exceptions.BadRequestException;
+import ru.practicum.exceptions.ConflictException;
+import ru.practicum.exceptions.ForbiddenException;
+import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.users.model.User;
 import ru.practicum.users.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
 import static ru.practicum.events.model.Event.timeFormat;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class EventServiceImpl implements EventService {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(timeFormat);
     private final EventRepository eventRepository;
@@ -58,8 +63,8 @@ public class EventServiceImpl implements EventService {
             text = text.toLowerCase();
             String finalText = text;
             events = events.stream().filter(e -> e.getAnnotation().toLowerCase().contains(finalText)
-                || e.getTitle().toLowerCase().contains(finalText)
-                || e.getDescription().toLowerCase().contains(finalText))
+                            || e.getTitle().toLowerCase().contains(finalText)
+                            || e.getDescription().toLowerCase().contains(finalText))
                     .toList();
         }
         if (categories != null && !categories.isEmpty()) {
@@ -89,15 +94,21 @@ public class EventServiceImpl implements EventService {
                     .toList();
         } else if (sortEnum.equals(EventSort.VIEWS)) {
             events = events.stream()
-                    .sorted(Comparator.comparing(Event::getViews))
+                    .sorted(Comparator.comparing(Event::getViewsAmount))
+                    .toList();
+        } else if (sortEnum.equals(EventSort.ID)) {
+            events = events.stream()
+                    .sorted(Comparator.comparing(Event::getId))
                     .toList();
         }
 
         List<EventShortDto> searchList = new ArrayList<>();
-        for (int i = from; i < from + size; i++) {
-            searchList.add(EventMapper.toShortDto(events.get(i)));
+        if (!events.isEmpty()) {
+            for (int i = from; i < from + size && i < events.size(); i++) {
+                searchList.add(EventMapper.toShortDto(events.get(i)));
+            }
         }
-        statClient.saveStat(httpServletRequest, "events/search");
+        //    statClient.saveStat(httpServletRequest, "events/search");
         return searchList;
     }
 
@@ -105,16 +116,20 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getEvent(Long eventId, HttpServletRequest httpServletRequest) {
         Event event = searchEvent(eventId);
         if (!event.getState().equals(EventState.PUBLISHED)) {
-            throw new ForbiddenException("Событие с ID " + eventId + " недоступно");
+            throw new NotFoundException("Событие с ID " + eventId + " недоступно");
         }
-        statClient.saveStat(httpServletRequest, "events/get");
-        return EventMapper.toFullDto(event);
+        //    statClient.saveStat(httpServletRequest, "events/get");
+        List<String> views = event.getViews();
+        if (!views.contains(httpServletRequest.getRemoteAddr())) {
+            views.add(httpServletRequest.getRemoteAddr());
+        }
+        Event saved = eventRepository.save(event);
+        return EventMapper.toFullDto(saved);
     }
 
     @Override
-    public List<EventFullDto> adminSearch(Long adminId, List<Long> users, List<String> states, List<Long> categories,
+    public List<EventFullDto> adminSearch(List<Long> users, List<String> states, List<Long> categories,
                                           String rangeStart, String rangeEnd, int from, int size) {
-        checkAdmin(adminId);
         List<Event> events = search(rangeStart, rangeEnd);
 
         if (users != null && !users.isEmpty()) {
@@ -133,15 +148,16 @@ public class EventServiceImpl implements EventService {
         }
 
         List<EventFullDto> searchList = new ArrayList<>();
-        for (int i = from; i < from + size; i++) {
-            searchList.add(EventMapper.toFullDto(events.get(i)));
+        if (!events.isEmpty()) {
+            for (int i = from; i < from + size && i < events.size(); i++) {
+                searchList.add(EventMapper.toFullDto(events.get(i)));
+            }
         }
         return searchList;
     }
 
     @Override
-    public EventFullDto adminEventUpdate(Long adminId, Long eventId, UpdateEventAdminRequest updateRequest) {
-        checkAdmin(adminId);
+    public EventFullDto adminEventUpdate(Long eventId, UpdateEventAdminRequest updateRequest) {
         Event event = searchEvent(eventId);
 
         if (updateRequest.getAnnotation() != null && !updateRequest.getAnnotation().isBlank()) {
@@ -175,7 +191,7 @@ public class EventServiceImpl implements EventService {
                 if (event.getState().equals(EventState.PUBLISHED)) {
                     throw new ConflictException("Нельзя отменить уже опубликованное событие");
                 }
-                event.setState(EventState.CANCELLED);
+                event.setState(EventState.CANCELED);
             }
         }
         if (updateRequest.getTitle() != null && !updateRequest.getTitle().isBlank()) {
@@ -186,16 +202,17 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventShortDto> getUserEvents(Long headerId, Long userId) {
-        checkUser(userId, headerId);
-        List<Event> events = eventRepository.findByInitiatorId(userId);
+    public List<EventShortDto> getUserEvents(Long userId, int from, int size) {
+        checkUser(userId);
+        Page<Event> events = eventRepository.findByInitiatorId(userId, PageRequest.of(from, size));
         return events.stream().map(EventMapper::toShortDto).toList();
     }
 
     @Override
-    public EventFullDto createEvent(Long headerId, Long userId, NewEventDto newEventDto) {
-        User user = checkUser(userId, headerId);
-        Event event = EventMapper.toEvent(newEventDto);
+    public EventFullDto createEvent(Long userId, NewEventDto newEventDto) {
+        User user = checkUser(userId);
+        Location location = checkLocation(newEventDto.getLocation());
+        Event event = EventMapper.toEvent(newEventDto, location);
         checkEventDate(event.getEventDate());
 
         if (newEventDto.getCategory() != null) {
@@ -208,17 +225,22 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto getUserEventById(Long headerId, Long userId, Long eventId) {
+    public EventFullDto getUserEventById(Long userId, Long eventId, HttpServletRequest httpServletRequest) {
         Event event = searchEvent(eventId);
-        checkInitiator(userId, headerId, event.getInitiator().getId(),
+        checkInitiator(userId, event.getInitiator().getId(),
                 "Просматривать полную информацию о событии может только его инициатор");
-        return EventMapper.toFullDto(event);
+        List<String> views = event.getViews();
+        if (!views.contains(httpServletRequest.getRemoteAddr())) {
+            views.add(httpServletRequest.getRemoteAddr());
+        }
+        Event saved = eventRepository.save(event);
+        return EventMapper.toFullDto(saved);
     }
 
     @Override
-    public EventFullDto userEventUpdate(Long headerId, Long userId, Long eventId, UpdateEventUserRequest updateRequest) {
+    public EventFullDto userEventUpdate(Long userId, Long eventId, UpdateEventUserRequest updateRequest) {
         Event event = searchEvent(eventId);
-        checkInitiator(userId, headerId, event.getInitiator().getId(),
+        checkInitiator(userId, event.getInitiator().getId(),
                 "Изменять событие может только его инициатор");
         if (event.getState().equals(EventState.PUBLISHED)) {
             throw new ConflictException("Изменять можно только отмененные и ожидающие модерации события");
@@ -251,7 +273,7 @@ public class EventServiceImpl implements EventService {
                 event.setState(EventState.PENDING);
             }
             if (stateAction.equals(StateAction.CANCEL_REVIEW)) {
-                event.setState(EventState.CANCELLED);
+                event.setState(EventState.CANCELED);
             }
         }
         if (updateRequest.getTitle() != null && !updateRequest.getTitle().isBlank()) {
@@ -263,19 +285,19 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<ParticipationRequestDto> getEventRequests(Long headerId, Long userId, Long eventId) {
+    public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
         Event event = searchEvent(eventId);
-        checkInitiator(userId, headerId, event.getInitiator().getId(),
+        checkInitiator(userId, event.getInitiator().getId(),
                 "Просматривать заявки на участие в событии может только его инициатор");
         List<Request> requests = requestRepository.findByEventId(eventId);
         return requests.stream().map(RequestMapper::toDto).toList();
     }
 
     @Override
-    public EventRequestStatusUpdateResult updateRequestStatus(Long headerId, Long userId, Long eventId,
+    public EventRequestStatusUpdateResult updateRequestStatus(Long userId, Long eventId,
                                                               EventRequestStatusUpdateRequest request) {
         Event event = searchEvent(eventId);
-        checkInitiator(userId, headerId, event.getInitiator().getId(),
+        checkInitiator(userId, event.getInitiator().getId(),
                 "Принимать и отклонять заявки на участие в событии может только его инициатор");
         EventRequestStatus newStatus = EventRequestStatus.valueOf(request.getStatus().toUpperCase());
 
@@ -288,10 +310,9 @@ public class EventServiceImpl implements EventService {
                         "находящихся в режиме ожидания");
             }
             if (newStatus.equals(EventRequestStatus.CONFIRMED)
-                    && event.getParticipantLimit() <  participantAmount + 1) {
+                    && event.getParticipantLimit() < participantAmount + 1) {
                 newStatus = EventRequestStatus.REJECTED;
                 String msg = "Заявка с ID " + req.getId() + " отклонена";
-                log.error(msg);
                 errors.add(msg);
             }
             req.setStatus(newStatus);
@@ -328,6 +349,9 @@ public class EventServiceImpl implements EventService {
 
         List<Event> searchEvent;
         if (searchStart != null && searchEnd != null) {
+            if (searchStart.isAfter(searchEnd) || searchStart.equals(searchEnd)) {
+                throw new BadRequestException("Некорректно задано время");
+            }
             searchEvent = eventRepository.findByEventDateIsAfterAndEventDateIsBefore(searchStart, searchEnd);
         } else if (searchStart != null) {
             searchEvent = eventRepository.findByEventDateIsAfter(searchStart);
@@ -343,15 +367,14 @@ public class EventServiceImpl implements EventService {
         return category.get();
     }
 
-    private User checkUser(Long userId, Long headerId) {
-        if (!userId.equals(headerId)) throw new ForbiddenException("Доступ запрещен");
+    private User checkUser(Long userId) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) throw new NotFoundException("Пользователь с ID " + userId + " не найден");
         return user.get();
     }
 
-    private void checkInitiator(Long userId, Long headerId, Long initiatorId, String msg) {
-        checkUser(userId, headerId);
+    private void checkInitiator(Long userId, Long initiatorId, String msg) {
+        checkUser(userId);
         if (!initiatorId.equals(userId)) {
             throw new ForbiddenException(msg);
         }
@@ -359,7 +382,8 @@ public class EventServiceImpl implements EventService {
 
     private LocalDateTime checkEventDate(String eventDateString, LocalDateTime published) {
         LocalDateTime newEventDate = LocalDateTime.parse(eventDateString, formatter);
-        if (published != null && newEventDate.isBefore(published.minusHours(1))) {
+        if ((published != null && newEventDate.isBefore(published.minusHours(1)))
+                || newEventDate.isBefore(LocalDateTime.now())) {
             throw new BadRequestException("Событие должно начинаться не раньше, чем за час до публикации");
         }
         return newEventDate;
@@ -376,11 +400,6 @@ public class EventServiceImpl implements EventService {
     private Location checkLocation(LocationDto locationDto) {
         Optional<Location> location = locationRepository.findByLatAndLon(locationDto.getLat(), locationDto.getLon());
         return location.orElseGet(() -> locationRepository.save(EventMapper.toLocation(locationDto)));
-    }
-
-    private void checkAdmin(Long userId) {
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty()) throw new NotFoundException("Пользователь с ID " + userId + " не найден");
     }
 
     private List<Event> filterCategories(List<Event> events, List<Long> categories) {

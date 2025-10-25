@@ -18,7 +18,6 @@ import java.util.List;
 @Validated
 public class AdminUserController {
     private final UserService userService;
-    public static final String userIdHeader = "X-Sharer-User-Id";
 
     @Autowired
     public AdminUserController(UserService userService) {
@@ -26,22 +25,21 @@ public class AdminUserController {
     }
 
     @GetMapping
-    public ResponseEntity<Collection<UserDto>> getUsers(@RequestHeader(userIdHeader) Long adminId,
-                                                        @RequestParam(required = false) List<Long> ids,
+    public ResponseEntity<Collection<UserDto>> getUsers(@RequestParam(required = false) List<Long> ids,
                                                         @RequestParam(defaultValue = "0") int from,
                                                         @RequestParam(defaultValue = "10") int size) {
-        return new ResponseEntity<>(userService.search(adminId, ids, from, size), HttpStatus.OK);
+        return new ResponseEntity<>(userService.search(ids, from, size), HttpStatus.OK);
     }
 
     @PostMapping
     @Validated
-    public ResponseEntity<UserDto> addUser(@RequestHeader(userIdHeader) Long adminId,
-                                           @RequestBody @Valid NewUserRequest newUserRequest) {
-        return new ResponseEntity<>(userService.addUser(adminId, newUserRequest), HttpStatus.CREATED);
+    public ResponseEntity<UserDto> addUser(@Valid @RequestBody NewUserRequest newUserRequest) {
+        return new ResponseEntity<>(userService.addUser(newUserRequest), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{userId}")
-    public void deleteUser(@RequestHeader(userIdHeader) Long adminId, @PathVariable Long userId) {
-        userService.deleteUser(adminId, userId);
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUser(@PathVariable Long userId) {
+        userService.deleteUser(userId);
     }
 }

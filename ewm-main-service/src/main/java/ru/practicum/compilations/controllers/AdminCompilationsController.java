@@ -11,8 +11,6 @@ import ru.practicum.compilations.dto.NewCompilationDto;
 import ru.practicum.compilations.dto.UpdateCompilationRequest;
 import ru.practicum.compilations.service.CompilationService;
 
-import static ru.practicum.users.controllers.AdminUserController.userIdHeader;
-
 @RestController
 @RequestMapping(path = "/admin/compilations")
 @Validated
@@ -26,21 +24,21 @@ public class AdminCompilationsController {
 
     @PostMapping
     @Validated
-    public ResponseEntity<CompilationDto> addCompilation(@RequestHeader(userIdHeader) Long adminId,
-                                                         @Valid @RequestBody NewCompilationDto newCompilationDto) {
-        return new ResponseEntity<>(compilationService.addCompilation(adminId, newCompilationDto), HttpStatus.CREATED);
+    public ResponseEntity<CompilationDto> addCompilation(@Valid @RequestBody NewCompilationDto newCompilationDto) {
+        return new ResponseEntity<>(compilationService.addCompilation(newCompilationDto), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{compId}")
-    public void deleteCompilation(@RequestHeader(userIdHeader) Long adminId, @PathVariable Long compId) {
-        compilationService.deleteCompilation(adminId, compId);
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCompilation(@PathVariable Long compId) {
+        compilationService.deleteCompilation(compId);
     }
 
-    @PatchMapping("/compId")
-    public ResponseEntity<CompilationDto> updateCompilation(@RequestHeader(userIdHeader) Long adminId,
-                                                            @PathVariable Long compId,
-                                                            @RequestBody UpdateCompilationRequest updateCompilation) {
-        return new ResponseEntity<>(compilationService.updateCompilation(adminId, compId, updateCompilation),
+    @PatchMapping("/{compId}")
+    @Validated
+    public ResponseEntity<CompilationDto> updateCompilation(@PathVariable Long compId,
+                                                            @Valid @RequestBody UpdateCompilationRequest updateCompilation) {
+        return new ResponseEntity<>(compilationService.updateCompilation(compId, updateCompilation),
                 HttpStatus.OK);
     }
 }

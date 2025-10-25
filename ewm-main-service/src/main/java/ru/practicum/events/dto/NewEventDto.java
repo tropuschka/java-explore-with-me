@@ -1,6 +1,9 @@
 package ru.practicum.events.dto;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +27,7 @@ public class NewEventDto {
     private boolean paid;
     @PositiveOrZero(message = "Ограничение на количество участников не может быть отрицательным")
     private Integer participantLimit;
-    private boolean requestModeration;
+    private Boolean requestModeration;
     @NotBlank(message = "Название события должно быть указано")
     @Size(min = 3, max = 120, message = "Длина названия события должна быть от {min} до {max} символов")
     private String title;
