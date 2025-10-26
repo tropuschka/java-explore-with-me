@@ -1,5 +1,6 @@
 package ru.practicum.events.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.events.dto.participation.ParticipationRequestDto;
@@ -34,7 +35,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public ParticipationRequestDto postRequest(Long userId, Long eventId) {
+    public ParticipationRequestDto postRequest(Long userId, Long eventId, HttpServletRequest httpServletRequest) {
         checkUser(userId);
         Event event = checkEvent(eventId);
         checkInitiator(userId, event);
@@ -48,6 +49,11 @@ public class RequestServiceImpl implements RequestService {
             request.setStatus(EventRequestStatus.CONFIRMED);
         }
         Request saved = requestRepository.save(request);
+        List<String> views = event.getViews();
+        if (!views.contains(httpServletRequest.getRemoteAddr())) {
+            views.add(httpServletRequest.getRemoteAddr());
+        }
+        eventRepository.save(event);
         return RequestMapper.toDto(saved);
     }
 

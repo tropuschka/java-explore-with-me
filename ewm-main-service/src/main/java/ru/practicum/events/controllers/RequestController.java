@@ -1,5 +1,6 @@
 package ru.practicum.events.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +29,8 @@ public class RequestController {
 
     @PostMapping
     public ResponseEntity<ParticipationRequestDto> postRequest(@PathVariable Long userId,
-                                                               @RequestParam Long eventId) {
-        return new ResponseEntity<>(requestService.postRequest(userId, eventId), HttpStatus.CREATED);
+                                                               @RequestParam Long eventId, HttpServletRequest httpServletRequest) {
+        return new ResponseEntity<>(requestService.postRequest(userId, eventId, httpServletRequest), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{requestId}/cancel")
