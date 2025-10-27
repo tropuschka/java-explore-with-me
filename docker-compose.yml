@@ -51,7 +51,7 @@ services:
     image: postgres:15
     container_name: postgres-main-db
     ports:
-      - "5432:5432"
+      - "6543:5432"
     environment:
       - POSTGRES_DB=ewm_db
       - POSTGRES_USER=postgres
