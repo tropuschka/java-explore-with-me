@@ -43,7 +43,7 @@ services:
     depends_on:
       - ewm-db
     environment:
-      - MAIN_DB=jdbc:postgresql://postgres-main-db:5432/ewm_db
+      - MAIN_DB=jdbc:postgresql://postgres-main-db:6543/ewm_db
       - MAIN_USER=postgres
       - MAIN_PASSWORD=1234
 
@@ -51,7 +51,7 @@ services:
     image: postgres:15
     container_name: postgres-main-db
     ports:
-      - "6543:5432"
+      - "6543:6543"
     environment:
       - POSTGRES_DB=ewm_db
       - POSTGRES_USER=postgres
