@@ -49,11 +49,6 @@ public class RequestServiceImpl implements RequestService {
             request.setStatus(EventRequestStatus.CONFIRMED);
         }
         Request saved = requestRepository.save(request);
-        List<String> views = event.getViews();
-        if (!views.contains(httpServletRequest.getRemoteAddr())) {
-            views.add(httpServletRequest.getRemoteAddr());
-        }
-        eventRepository.save(event);
         return RequestMapper.toDto(saved);
     }
 
