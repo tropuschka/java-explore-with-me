@@ -22,7 +22,7 @@ public class StatClient {
     private final RestTemplate restTemplate;
     private static final String timeFormat = "yyyy-MM-dd HH:mm:ss";
 
-    public StatClient(@Value("${stats-server.url:http://localhost:9090}") String path) {
+    public StatClient(@Value("${stats-server:9090}") String path) {
         this.restTemplate = new RestTemplateBuilder()
                 .uriTemplateHandler(new DefaultUriBuilderFactory(path))
                 .requestFactory(() -> new HttpComponentsClientHttpRequestFactory())
