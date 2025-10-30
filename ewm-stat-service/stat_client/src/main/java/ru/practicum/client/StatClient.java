@@ -19,7 +19,7 @@ import java.util.Objects;
 
 @Component
 public class StatClient {
-    @Value("${stats-service.url}")
+    @Value("${stats-service.url:http://localhost:9090}")
     private String path;
     private final RestTemplate restTemplate;
     private static final String timeFormat = "yyyy-MM-dd HH:mm:ss";
