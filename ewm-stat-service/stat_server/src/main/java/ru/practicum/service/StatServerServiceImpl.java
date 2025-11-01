@@ -1,13 +1,13 @@
 package ru.practicum.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import ru.practicum.dto.ResponseStatDto;
+import ru.practicum.dto.StatDto;
 import ru.practicum.exceptions.ConditionsNotMetException;
 import ru.practicum.mapping.StatMapper;
 import ru.practicum.model.Stat;
 import ru.practicum.repository.StatServerRepository;
-import org.springframework.stereotype.Service;
-import ru.practicum.dto.ResponseStatDto;
-import ru.practicum.dto.StatDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
