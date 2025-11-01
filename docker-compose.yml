@@ -3,8 +3,7 @@ services:
   stats-server:
     build: ./ewm-stat-service/stat_server
 
-    image:
-      stat_server:latest
+    image: stat_server:latest
     container_name: stat_server
 
     ports:
@@ -41,6 +40,7 @@ services:
 
     depends_on:
       - ewm-db
+      - stats-server
     environment:
       - MAIN_DB=jdbc:postgresql://ewm-db:5432/ewm_db
       - MAIN_USER=postgres
