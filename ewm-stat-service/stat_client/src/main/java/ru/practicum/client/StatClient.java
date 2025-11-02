@@ -24,7 +24,7 @@ public class StatClient {
     private final RestTemplate restTemplate;
     private static final String timeFormat = "yyyy-MM-dd HH:mm:ss";
 
-    public StatClient(@Autowired @Value("${stats-service.url:http://localhost:9090}") String path) {
+    public StatClient(@Value("${stats-service.url:http://localhost:9090}") String path) {
         this.path = path;
         this.restTemplate = new RestTemplateBuilder()
                 .uriTemplateHandler(new DefaultUriBuilderFactory(path))
