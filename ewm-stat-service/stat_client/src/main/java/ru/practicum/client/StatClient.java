@@ -1,6 +1,7 @@
 package ru.practicum.client;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class StatClient {
     private final RestTemplate restTemplate;
     private static final String timeFormat = "yyyy-MM-dd HH:mm:ss";
 
-    public StatClient(@Value("${stats-service.url:http://localhost:9090}") String path) {
+    public StatClient(@Autowired @Value("${stats-service.url:http://localhost:9090}") String path) {
         this.path = path;
         this.restTemplate = new RestTemplateBuilder()
                 .uriTemplateHandler(new DefaultUriBuilderFactory(path))
