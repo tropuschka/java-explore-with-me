@@ -108,7 +108,7 @@ public class EventServiceImpl implements EventService {
                 searchList.add(EventMapper.toShortDto(events.get(i)));
             }
         }
-        statClient.saveStat(httpServletRequest, "events/search");
+//        statClient.saveStat(httpServletRequest, "events/search");
         return searchList;
     }
 
@@ -118,7 +118,7 @@ public class EventServiceImpl implements EventService {
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new NotFoundException("Событие с ID " + eventId + " недоступно");
         }
-        statClient.saveStat(httpServletRequest, "events/get");
+//        statClient.saveStat(httpServletRequest, "events/get");
         List<String> views = event.getViews();
         if (!views.contains(httpServletRequest.getRemoteAddr())) {
             views.add(httpServletRequest.getRemoteAddr());
@@ -296,6 +296,11 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventRequestStatusUpdateResult updateRequestStatus(Long userId, Long eventId,
                                                               EventRequestStatusUpdateRequest request) {
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         Event event = searchEvent(eventId);
         checkInitiator(userId, event.getInitiator().getId(),
                 "Принимать и отклонять заявки на участие в событии может только его инициатор");
