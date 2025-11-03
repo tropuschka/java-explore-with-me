@@ -296,11 +296,6 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventRequestStatusUpdateResult updateRequestStatus(Long userId, Long eventId,
                                                               EventRequestStatusUpdateRequest request) {
-        try {
-            Thread.sleep(50);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
         Event event = searchEvent(eventId);
         checkInitiator(userId, event.getInitiator().getId(),
                 "Принимать и отклонять заявки на участие в событии может только его инициатор");
