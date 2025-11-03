@@ -108,7 +108,7 @@ public class EventServiceImpl implements EventService {
                 searchList.add(EventMapper.toShortDto(events.get(i)));
             }
         }
-//        statClient.saveStat(httpServletRequest, "events/search");
+        statClient.saveStat(httpServletRequest, "events/search");
         return searchList;
     }
 
@@ -118,7 +118,7 @@ public class EventServiceImpl implements EventService {
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new NotFoundException("Событие с ID " + eventId + " недоступно");
         }
-//        statClient.saveStat(httpServletRequest, "events/get");
+        statClient.saveStat(httpServletRequest, "events/get");
         List<String> views = event.getViews();
         if (!views.contains(httpServletRequest.getRemoteAddr())) {
             views.add(httpServletRequest.getRemoteAddr());
