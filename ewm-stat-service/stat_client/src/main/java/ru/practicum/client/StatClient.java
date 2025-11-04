@@ -32,13 +32,9 @@ public class StatClient {
     }
 
     public void saveStat(HttpServletRequest request, String application) {
-        if (request == null) try {
-            throw new Exception("Request is null");
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
         StatDto statDto = new StatDto(null, application, request.getRemoteAddr(), request.getRequestURI(),
                 LocalDateTime.now().toString());
+        System.out.println(statDto);
         restTemplate.postForLocation(path + "/hit", statDto);
     }
 
