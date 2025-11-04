@@ -20,7 +20,6 @@ public class StatServerServiceImpl implements StatServerService {
     @Override
     public StatDto add(StatDto statDto) {
         Stat stat = StatMapper.toStat(statDto);
-        System.out.println("hit " + stat.getUri());
         return StatMapper.toStatDto(statServerRepository.save(stat));
     }
 
