@@ -34,7 +34,11 @@ public class StatClient {
     public void saveStat(HttpServletRequest request, String application) {
         StatDto statDto = new StatDto(null, application, request.getRemoteAddr(), request.getRequestURI(),
                 LocalDateTime.now().toString());
-        restTemplate.postForLocation(path + "/hit", statDto);
+        try {
+            restTemplate.postForLocation(path + "/hit", statDto);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public List<ResponseStatDto> getViewStats(LocalDateTime start, LocalDateTime end,
