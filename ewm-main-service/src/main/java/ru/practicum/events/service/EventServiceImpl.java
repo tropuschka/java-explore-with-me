@@ -118,7 +118,7 @@ public class EventServiceImpl implements EventService {
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new NotFoundException("Событие с ID " + eventId + " недоступно");
         }
-        statClient.saveStat(httpServletRequest, "events/get");
+        statClient.saveStat(httpServletRequest, "events/" + eventId);
         List<String> views = event.getViews();
         if (!views.contains(httpServletRequest.getRemoteAddr())) {
             views.add(httpServletRequest.getRemoteAddr());
