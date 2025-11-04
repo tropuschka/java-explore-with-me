@@ -33,7 +33,7 @@ public class StatClient {
 
     public void saveStat(HttpServletRequest request, String application) {
         StatDto statDto = new StatDto(null, application, request.getRemoteAddr(), request.getRequestURI(),
-                LocalDateTime.now().toString());
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern(timeFormat)));
         try {
             restTemplate.postForLocation(path + "/hit", statDto);
         } catch (Exception e) {
