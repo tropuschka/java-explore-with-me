@@ -28,7 +28,6 @@ public class StatServerController {
     @PostMapping("/hit")
     @Validated
     public ResponseEntity<StatDto> addStat(@RequestBody @Valid StatDto statDto) {
-        System.out.println("Hit!");
         return new ResponseEntity<>(statServerService.add(statDto), HttpStatus.CREATED);
     }
 
