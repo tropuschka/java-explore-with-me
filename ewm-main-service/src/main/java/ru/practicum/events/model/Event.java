@@ -38,7 +38,6 @@ public class Event {
     private boolean paid;
     @Column(name = "title", nullable = false)
     private String title;
-    private int views;
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "participation", joinColumns = @JoinColumn(name = "event_id"),
             inverseJoinColumns = @JoinColumn(name = "id"))

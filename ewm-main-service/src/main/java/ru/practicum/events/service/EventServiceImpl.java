@@ -81,6 +81,9 @@ public class EventServiceImpl implements EventService {
                     .toList();
         }
 
+        List<EventShortDto> eventShortDtos = events.stream().map(EventMapper::toShortDto).toList();
+        eventShortDtos = setViews(eventShortDtos);
+
         EventSort sortEnum;
         try {
             sortEnum = EventSort.valueOf(searchDto.getSort().toUpperCase());
@@ -89,16 +92,16 @@ public class EventServiceImpl implements EventService {
                     "События можно сортировать по дате или по количеству просмотров");
         }
         if (sortEnum.equals(EventSort.EVENT_DATE)) {
-            events = events.stream()
-                    .sorted(Comparator.comparing(Event::getEventDate))
+            eventShortDtos = eventShortDtos.stream()
+                    .sorted(Comparator.comparing(EventShortDto::getEventDate))
                     .toList();
         } else if (sortEnum.equals(EventSort.VIEWS)) {
-            events = events.stream()
-                    .sorted(Comparator.comparing(Event::getViews))
+            eventShortDtos = eventShortDtos.stream()
+                    .sorted(Comparator.comparing(EventShortDto::getViews))
                     .toList();
         } else if (sortEnum.equals(EventSort.ID)) {
-            events = events.stream()
-                    .sorted(Comparator.comparing(Event::getId))
+            eventShortDtos = eventShortDtos.stream()
+                    .sorted(Comparator.comparing(EventShortDto::getId))
                     .toList();
         }
 
@@ -119,11 +122,8 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException("Событие с ID " + eventId + " недоступно");
         }
         statClient.saveStat(httpServletRequest);
-        List<ResponseStatDto> views = statClient.getViewStats(event.getCreatedOn(), LocalDateTime.now(),
-                List.of("/events/" + eventId), true);
-        event.setViews(views.size());
         Event saved = eventRepository.save(event);
-        return EventMapper.toFullDto(saved);
+        return toFullWithViews(saved);
     }
 
     @Override
@@ -161,8 +161,9 @@ public class EventServiceImpl implements EventService {
                 for (ResponseStatDto responseStatDto : views) {
                     if (responseStatDto.getApp().equals("/events/" + event.getId())) eventViews.add(responseStatDto);
                 }
-                event.setViews(eventViews.size());
-                searchList.add(EventMapper.toFullDto(event));
+                EventFullDto fullDto = EventMapper.toFullDto(event);
+                fullDto.setViews(eventViews.size());
+                searchList.add(fullDto);
             }
         }
         return searchList;
@@ -209,18 +210,16 @@ public class EventServiceImpl implements EventService {
         if (updateRequest.getTitle() != null && !updateRequest.getTitle().isBlank()) {
             event.setTitle(updateRequest.getTitle());
         }
-        List<ResponseStatDto> views = statClient.getViewStats(event.getCreatedOn(), LocalDateTime.now(),
-                List.of("/events/" + eventId), true);
-        event.setViews(views.size());
         Event saved = eventRepository.save(event);
-        return EventMapper.toFullDto(saved);
+        return toFullWithViews(saved);
     }
 
     @Override
     public List<EventShortDto> getUserEvents(Long userId, int from, int size) {
         checkUser(userId);
         Page<Event> events = eventRepository.findByInitiatorId(userId, PageRequest.of(from, size));
-        return events.stream().map(EventMapper::toShortDto).toList();
+        List<EventShortDto> shorts = events.stream().map(EventMapper::toShortDto).toList();
+        return setViews(shorts);
     }
 
     @Override
@@ -236,7 +235,7 @@ public class EventServiceImpl implements EventService {
         event.setInitiator(user);
 
         Event saved = eventRepository.save(event);
-        return EventMapper.toFullDto(saved);
+        return toFullWithViews(saved);
     }
 
     @Override
@@ -245,11 +244,8 @@ public class EventServiceImpl implements EventService {
         checkInitiator(userId, event.getInitiator().getId(),
                 "Просматривать полную информацию о событии может только его инициатор");
 
-        List<ResponseStatDto> views = statClient.getViewStats(event.getCreatedOn(), LocalDateTime.now(),
-                List.of("/events/" + eventId), true);
-        event.setViews(views.size());
         Event saved = eventRepository.save(event);
-        return EventMapper.toFullDto(saved);
+        return toFullWithViews(saved);
     }
 
     @Override
@@ -294,12 +290,9 @@ public class EventServiceImpl implements EventService {
         if (updateRequest.getTitle() != null && !updateRequest.getTitle().isBlank()) {
             event.setTitle(updateRequest.getTitle());
         }
-        List<ResponseStatDto> views = statClient.getViewStats(event.getCreatedOn(), LocalDateTime.now(),
-                List.of("/events/" + eventId), true);
-        event.setViews(views.size());
 
         Event saved = eventRepository.save(event);
-        return EventMapper.toFullDto(saved);
+        return toFullWithViews(saved);
     }
 
     @Override
@@ -422,5 +415,35 @@ public class EventServiceImpl implements EventService {
                 .filter(e -> e.getCategory() != null)
                 .filter(e -> categories.contains(e.getCategory().getId()))
                 .toList();
+    }
+
+    private List<EventShortDto> setViews(List<EventShortDto> eventShortDtos) {
+        List<String> eventIds = new ArrayList<>();
+        for (EventShortDto dto : eventShortDtos) {
+            eventIds.add("/events/" + dto.getId());
+        }
+        List<ResponseStatDto> views = statClient.getViewStats(
+                LocalDateTime.of(2000, Month.JANUARY, 1, 0, 0), LocalDateTime.now(),
+                eventIds, true);
+        for (EventShortDto dto : eventShortDtos) {
+            List<ResponseStatDto> eventViews = new ArrayList<>();
+            for (ResponseStatDto responseStatDto : views) {
+                if (responseStatDto.getApp().equals("/events/" + dto.getId())) eventViews.add(responseStatDto);
+            }
+            dto.setViews(eventViews.size());
+        }
+        return eventShortDtos;
+    }
+
+    private int setViews(LocalDateTime created, Long eventId) {
+        List<ResponseStatDto> views = statClient.getViewStats(created, LocalDateTime.now(),
+                List.of("/events/" + eventId), true);
+        return views.size();
+    }
+
+    private EventFullDto toFullWithViews(Event event) {
+        EventFullDto fullDto = EventMapper.toFullDto(event);
+        fullDto.setViews(setViews(event.getCreatedOn(), fullDto.getId()));
+        return fullDto;
     }
 }

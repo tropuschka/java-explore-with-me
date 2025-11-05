@@ -22,7 +22,7 @@ public class EventMapper {
     public static EventShortDto toShortDto(Event event) {
         return new EventShortDto(event.getAnnotation(), CategoryMapper.toDto(event.getCategory()),
                 event.getParticipantAmount(), event.getEventDate().format(formatter), event.getId(),
-                UserMapper.toShortDto(event.getInitiator()), event.isPaid(), event.getTitle(), event.getViews());
+                UserMapper.toShortDto(event.getInitiator()), event.isPaid(), event.getTitle(), 0);
     }
 
     public static EventFullDto toFullDto(Event event) {
@@ -34,7 +34,7 @@ public class EventMapper {
                 event.getEventDate().format(formatter), event.getId(), UserMapper.toShortDto(event.getInitiator()),
                 toLocationDto(event.getLocation()), event.isPaid(), event.getParticipantLimit(),
                 publ, event.isRequestModeration(), event.getState().toString(),
-                event.getTitle(), event.getViews());
+                event.getTitle(), 0);
     }
 
     public static Location toLocation(LocationDto locationDto) {
@@ -46,7 +46,7 @@ public class EventMapper {
         if (newEventDto.getRequestModeration() == null) newEventDto.setRequestModeration(true);
         return new Event(null, newEventDto.getAnnotation(), null,
                 LocalDateTime.parse(newEventDto.getEventDate(), formatter), null, newEventDto.isPaid(),
-                newEventDto.getTitle(), 0, new HashSet<>(), null,
+                newEventDto.getTitle(), new HashSet<>(), null,
                 newEventDto.getParticipantLimit(), newEventDto.getRequestModeration(), newEventDto.getDescription(),
                 LocalDateTime.now(), location, EventState.PENDING);
     }
