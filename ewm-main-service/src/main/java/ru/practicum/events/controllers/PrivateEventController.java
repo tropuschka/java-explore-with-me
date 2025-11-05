@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.events.dto.EventFullDto;
@@ -30,45 +29,45 @@ public class PrivateEventController {
     }
 
     @GetMapping
-    public ResponseEntity<List<EventShortDto>> getUserEvents(@PathVariable Long userId,
+    public List<EventShortDto> getUserEvents(@PathVariable Long userId,
                                                              @RequestParam(defaultValue = "0") int from,
                                                              @RequestParam(defaultValue = "10") int size) {
-        return new ResponseEntity<>(eventService.getUserEvents(userId, from, size), HttpStatus.OK);
+        return eventService.getUserEvents(userId, from, size);
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     @Validated
-    public ResponseEntity<EventFullDto> postEvent(@PathVariable Long userId, @Valid @RequestBody NewEventDto newEvent) {
-        return new ResponseEntity<>(eventService.createEvent(userId, newEvent), HttpStatus.CREATED);
+    public EventFullDto postEvent(@PathVariable Long userId, @Valid @RequestBody NewEventDto newEvent) {
+        return eventService.createEvent(userId, newEvent);
     }
 
     @GetMapping("/{eventId}")
-    public ResponseEntity<EventFullDto> getEventById(@PathVariable(name = "userId") Long userId,
+    public EventFullDto getEventById(@PathVariable(name = "userId") Long userId,
                                                      @PathVariable(name = "eventId") Long eventId,
                                                      HttpServletRequest httpServletRequest) {
-        return new ResponseEntity<>(eventService.getUserEventById(userId, eventId, httpServletRequest), HttpStatus.OK);
+        return eventService.getUserEventById(userId, eventId, httpServletRequest);
     }
 
     @PatchMapping("/{eventId}")
     @Validated
-    public ResponseEntity<EventFullDto> updateEvent(@PathVariable(name = "userId") Long userId,
+    public EventFullDto updateEvent(@PathVariable(name = "userId") Long userId,
                                                     @PathVariable(name = "eventId") Long eventId,
                                                     @Valid @RequestBody UpdateEventUserRequest updateEventUserRequest) {
-        return new ResponseEntity<>(eventService.userEventUpdate(userId, eventId, updateEventUserRequest),
-                HttpStatus.OK);
+        return eventService.userEventUpdate(userId, eventId, updateEventUserRequest);
     }
 
     @GetMapping("/{eventId}/requests")
-    public ResponseEntity<List<ParticipationRequestDto>> getEventRequests(@PathVariable(name = "userId") Long userId,
+    public List<ParticipationRequestDto> getEventRequests(@PathVariable(name = "userId") Long userId,
                                                                           @PathVariable(name = "eventId") Long eventId) {
-        return new ResponseEntity<>(eventService.getEventRequests(userId, eventId), HttpStatus.OK);
+        return eventService.getEventRequests(userId, eventId);
     }
 
     @PatchMapping("/{eventId}/requests")
     @Validated
-    public ResponseEntity<EventRequestStatusUpdateResult> updateRequestStatus(@PathVariable(name = "userId") Long userId,
+    public EventRequestStatusUpdateResult updateRequestStatus(@PathVariable(name = "userId") Long userId,
                                                                               @PathVariable(name = "eventId") Long eventId,
                                                                               @Valid @RequestBody EventRequestStatusUpdateRequest request) {
-        return new ResponseEntity<>(eventService.updateRequestStatus(userId, eventId, request), HttpStatus.OK);
+        return eventService.updateRequestStatus(userId, eventId, request);
     }
 }

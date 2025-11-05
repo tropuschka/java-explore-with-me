@@ -3,7 +3,6 @@ package ru.practicum.categories.controllers;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.categories.dto.CategoryDto;
@@ -22,9 +21,10 @@ public class AdminCategoryController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     @Validated
-    public ResponseEntity<CategoryDto> addCategory(@Valid @RequestBody NewCategoryDto newCategoryDto) {
-        return new ResponseEntity<>(categoryService.addCategory(newCategoryDto), HttpStatus.CREATED);
+    public CategoryDto addCategory(@Valid @RequestBody NewCategoryDto newCategoryDto) {
+        return categoryService.addCategory(newCategoryDto);
     }
 
     @DeleteMapping("/{catId}")
@@ -35,8 +35,8 @@ public class AdminCategoryController {
 
     @PatchMapping("/{catId}")
     @Validated
-    public ResponseEntity<CategoryDto> updateCategory(@PathVariable Long catId,
+    public CategoryDto updateCategory(@PathVariable Long catId,
                                                       @Valid @RequestBody NewCategoryDto newCategoryDto) {
-        return new ResponseEntity<>(categoryService.updateCategory(catId, newCategoryDto), HttpStatus.OK);
+        return categoryService.updateCategory(catId, newCategoryDto);
     }
 }

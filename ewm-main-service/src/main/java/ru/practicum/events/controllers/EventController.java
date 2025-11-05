@@ -2,8 +2,6 @@ package ru.practicum.events.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.events.dto.EventFullDto;
@@ -24,7 +22,7 @@ public class EventController {
     }
 
     @GetMapping
-    public ResponseEntity<List<EventShortDto>> search(@RequestParam(required = false) String text,
+    public List<EventShortDto> search(@RequestParam(required = false) String text,
                                                       @RequestParam(required = false) List<Long> categories,
                                                       @RequestParam(required = false) Boolean paid,
                                                       @RequestParam(required = false) String rangeStart,
@@ -34,12 +32,12 @@ public class EventController {
                                                       @RequestParam(defaultValue = "0") int from,
                                                       @RequestParam(defaultValue = "10") int size,
                                                       HttpServletRequest httpServletRequest) {
-        return new ResponseEntity<>(eventService.search(text, categories, paid, rangeStart, rangeEnd, onlyAvailable,
-                sort, from, size, httpServletRequest), HttpStatus.OK);
+        return eventService.search(text, categories, paid, rangeStart, rangeEnd, onlyAvailable,
+                sort, from, size, httpServletRequest);
     }
 
     @GetMapping("/{eventId}")
-    public ResponseEntity<EventFullDto> getEvent(@PathVariable Long eventId, HttpServletRequest httpServletRequest) {
-        return new ResponseEntity<>(eventService.getEvent(eventId, httpServletRequest), HttpStatus.OK);
+    public EventFullDto getEvent(@PathVariable Long eventId, HttpServletRequest httpServletRequest) {
+        return eventService.getEvent(eventId, httpServletRequest);
     }
 }

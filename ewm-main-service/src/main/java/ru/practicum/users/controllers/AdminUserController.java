@@ -3,7 +3,6 @@ package ru.practicum.users.controllers;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.users.dto.NewUserRequest;
@@ -25,16 +24,17 @@ public class AdminUserController {
     }
 
     @GetMapping
-    public ResponseEntity<Collection<UserDto>> getUsers(@RequestParam(required = false) List<Long> ids,
+    public Collection<UserDto> getUsers(@RequestParam(required = false) List<Long> ids,
                                                         @RequestParam(defaultValue = "0") int from,
                                                         @RequestParam(defaultValue = "10") int size) {
-        return new ResponseEntity<>(userService.search(ids, from, size), HttpStatus.OK);
+        return userService.search(ids, from, size);
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     @Validated
-    public ResponseEntity<UserDto> addUser(@Valid @RequestBody NewUserRequest newUserRequest) {
-        return new ResponseEntity<>(userService.addUser(newUserRequest), HttpStatus.CREATED);
+    public UserDto addUser(@Valid @RequestBody NewUserRequest newUserRequest) {
+        return userService.addUser(newUserRequest);
     }
 
     @DeleteMapping("/{userId}")
