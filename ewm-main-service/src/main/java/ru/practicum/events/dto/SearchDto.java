@@ -22,8 +22,8 @@ public class SearchDto {
     private Boolean onlyAvailable;
     private String sort;
 
-    public SearchDto (List<Long> users, List<String> states, List<Long> categories, String rangeStart, String rangeEnd,
-                      int from, int size) {
+    public SearchDto(List<Long> users, List<String> states, List<Long> categories, String rangeStart, String rangeEnd,
+                     int from, int size) {
         this.users = users;
         this.states = states;
         this.categories = categories;

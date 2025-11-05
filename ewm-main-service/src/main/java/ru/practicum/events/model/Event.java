@@ -10,7 +10,6 @@ import ru.practicum.events.status.EventState;
 import ru.practicum.users.model.User;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 

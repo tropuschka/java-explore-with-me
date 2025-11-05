@@ -12,7 +12,6 @@ import ru.practicum.users.mapping.UserMapper;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashSet;
 
 import static ru.practicum.events.model.Event.timeFormat;

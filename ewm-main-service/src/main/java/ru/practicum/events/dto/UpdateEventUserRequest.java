@@ -25,4 +25,3 @@ public class UpdateEventUserRequest {
     @Size(min = 3, max = 120, message = "Длина названия события должна быть от {min} до {max} символов")
     private String title;
 }
-

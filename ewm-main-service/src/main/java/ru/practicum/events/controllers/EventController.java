@@ -24,15 +24,15 @@ public class EventController {
 
     @GetMapping
     public List<EventShortDto> search(@RequestParam(required = false) String text,
-                                                      @RequestParam(required = false) List<Long> categories,
-                                                      @RequestParam(required = false) Boolean paid,
-                                                      @RequestParam(required = false) String rangeStart,
-                                                      @RequestParam(required = false) String rangeEnd,
-                                                      @RequestParam(defaultValue = "false") boolean onlyAvailable,
-                                                      @RequestParam(defaultValue = "ID") String sort,
-                                                      @RequestParam(defaultValue = "0") int from,
-                                                      @RequestParam(defaultValue = "10") int size,
-                                                      HttpServletRequest httpServletRequest) {
+                                      @RequestParam(required = false) List<Long> categories,
+                                      @RequestParam(required = false) Boolean paid,
+                                      @RequestParam(required = false) String rangeStart,
+                                      @RequestParam(required = false) String rangeEnd,
+                                      @RequestParam(defaultValue = "false") boolean onlyAvailable,
+                                      @RequestParam(defaultValue = "ID") String sort,
+                                      @RequestParam(defaultValue = "0") int from,
+                                      @RequestParam(defaultValue = "10") int size,
+                                      HttpServletRequest httpServletRequest) {
         return eventService.search(new SearchDto(text, categories, paid, rangeStart, rangeEnd,
                 onlyAvailable, sort, from, size), httpServletRequest);
     }

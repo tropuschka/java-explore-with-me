@@ -16,8 +16,8 @@ public interface StatServerRepository extends JpaRepository<Stat, Long> {
             "group by stat.app, stat.uri " +
             "order by count(distinct stat.ip) desc")
     List<ResponseStatDto> findAllByTimestampBetweenStartAndEndWhereIpIsUnique(LocalDateTime start,
-                                                                                      LocalDateTime end,
-                                                                                      List<String> uris);
+                                                                              LocalDateTime end,
+                                                                              List<String> uris);
 
     @Query("select new ru.practicum.dto.ResponseStatDto(stat.app, stat.uri, count(stat.ip)) " +
             "from Stat as stat " +
@@ -26,8 +26,8 @@ public interface StatServerRepository extends JpaRepository<Stat, Long> {
             "group by stat.app, stat.uri " +
             "order by count(stat.ip) desc")
     List<ResponseStatDto> findAllByTimestampBetweenStartAndEndWithUris(LocalDateTime start,
-                                                                                      LocalDateTime end,
-                                                                                      List<String> uris);
+                                                                       LocalDateTime end,
+                                                                       List<String> uris);
 
     @Query("select new ru.practicum.dto.ResponseStatDto(stat.app, stat.uri, count(stat.ip)) " +
             "from Stat as stat " +
@@ -35,5 +35,5 @@ public interface StatServerRepository extends JpaRepository<Stat, Long> {
             "group by stat.app, stat.uri " +
             "order by count(stat.ip) desc")
     List<ResponseStatDto> findAllByTimestampBetweenStartAndEndWithoutUris(LocalDateTime start,
-                                                                       LocalDateTime end);
+                                                                          LocalDateTime end);
 }

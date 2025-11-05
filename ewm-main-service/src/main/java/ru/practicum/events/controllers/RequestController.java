@@ -29,14 +29,14 @@ public class RequestController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ParticipationRequestDto postRequest(@PathVariable Long userId,
-                                                               @RequestParam Long eventId,
-                                                               HttpServletRequest httpServletRequest) {
+                                               @RequestParam Long eventId,
+                                               HttpServletRequest httpServletRequest) {
         return requestService.postRequest(userId, eventId, httpServletRequest);
     }
 
     @PatchMapping("/{requestId}/cancel")
     public ParticipationRequestDto cancelRequest(@PathVariable Long userId,
-                                                                 @PathVariable Long requestId) {
+                                                 @PathVariable Long requestId) {
         return requestService.cancelRequest(userId, requestId);
     }
 }

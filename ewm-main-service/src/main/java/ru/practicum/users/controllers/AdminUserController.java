@@ -25,8 +25,8 @@ public class AdminUserController {
 
     @GetMapping
     public Collection<UserDto> getUsers(@RequestParam(required = false) List<Long> ids,
-                                                        @RequestParam(defaultValue = "0") int from,
-                                                        @RequestParam(defaultValue = "10") int size) {
+                                        @RequestParam(defaultValue = "0") int from,
+                                        @RequestParam(defaultValue = "10") int size) {
         return userService.search(ids, from, size);
     }
 

@@ -24,19 +24,19 @@ public class AdminEventController {
 
     @GetMapping
     public List<EventFullDto> search(@RequestParam(required = false) List<Long> users,
-                                                     @RequestParam(required = false) List<String> states,
-                                                     @RequestParam(required = false) List<Long> categories,
-                                                     @RequestParam(required = false) String rangeStart,
-                                                     @RequestParam(required = false) String rangeEnd,
-                                                     @RequestParam(defaultValue = "0") int from,
-                                                     @RequestParam(defaultValue = "10") int size) {
+                                     @RequestParam(required = false) List<String> states,
+                                     @RequestParam(required = false) List<Long> categories,
+                                     @RequestParam(required = false) String rangeStart,
+                                     @RequestParam(required = false) String rangeEnd,
+                                     @RequestParam(defaultValue = "0") int from,
+                                     @RequestParam(defaultValue = "10") int size) {
         return eventService.adminSearch(new SearchDto(users, states, categories, rangeStart, rangeEnd, from, size));
     }
 
     @PatchMapping("/{eventId}")
     @Validated
     public EventFullDto update(@PathVariable Long eventId,
-                                               @Valid @RequestBody UpdateEventAdminRequest updateEventAdminRequest) {
+                               @Valid @RequestBody UpdateEventAdminRequest updateEventAdminRequest) {
         return eventService.adminEventUpdate(eventId, updateEventAdminRequest);
     }
 }
