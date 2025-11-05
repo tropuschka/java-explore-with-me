@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.categories.model.Category;
 import ru.practicum.categories.repository.CategoryRepository;
 import ru.practicum.client.StatClient;
+import ru.practicum.dto.ResponseStatDto;
 import ru.practicum.events.dto.*;
 import ru.practicum.events.dto.participation.EventRequestStatusUpdateRequest;
 import ru.practicum.events.dto.participation.EventRequestStatusUpdateResult;
@@ -32,6 +33,7 @@ import ru.practicum.users.model.User;
 import ru.practicum.users.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -92,7 +94,7 @@ public class EventServiceImpl implements EventService {
                     .toList();
         } else if (sortEnum.equals(EventSort.VIEWS)) {
             events = events.stream()
-                    .sorted(Comparator.comparing(Event::getViewsAmount))
+                    .sorted(Comparator.comparing(Event::getViews))
                     .toList();
         } else if (sortEnum.equals(EventSort.ID)) {
             events = events.stream()
@@ -117,10 +119,9 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException("Событие с ID " + eventId + " недоступно");
         }
         statClient.saveStat(httpServletRequest);
-        List<String> views = event.getViews();
-        if (!views.contains(httpServletRequest.getRemoteAddr())) {
-            views.add(httpServletRequest.getRemoteAddr());
-        }
+        List<ResponseStatDto> views = statClient.getViewStats(event.getCreatedOn(), LocalDateTime.now(),
+                List.of("/events/" + eventId), true);
+        event.setViews(views.size());
         Event saved = eventRepository.save(event);
         return EventMapper.toFullDto(saved);
     }
@@ -147,8 +148,21 @@ public class EventServiceImpl implements EventService {
 
         List<EventFullDto> searchList = new ArrayList<>();
         if (!events.isEmpty()) {
+            List<String> eventIds = new ArrayList<>();
             for (int i = searchDto.getFrom(); i < searchDto.getFrom() + searchDto.getSize() && i < events.size(); i++) {
-                searchList.add(EventMapper.toFullDto(events.get(i)));
+                eventIds.add("/events/" + events.get(i).getId());
+            }
+            List<ResponseStatDto> views = statClient.getViewStats(
+                    LocalDateTime.of(2000, Month.JANUARY, 1, 0, 0), LocalDateTime.now(),
+                    eventIds, true);
+            for (int i = searchDto.getFrom(); i < searchDto.getFrom() + searchDto.getSize() && i < events.size(); i++) {
+                Event event = events.get(i);
+                List<ResponseStatDto> eventViews = new ArrayList<>();
+                for (ResponseStatDto responseStatDto : views) {
+                    if (responseStatDto.getApp().equals("/events/" + event.getId())) eventViews.add(responseStatDto);
+                }
+                event.setViews(eventViews.size());
+                searchList.add(EventMapper.toFullDto(event));
             }
         }
         return searchList;
@@ -195,6 +209,9 @@ public class EventServiceImpl implements EventService {
         if (updateRequest.getTitle() != null && !updateRequest.getTitle().isBlank()) {
             event.setTitle(updateRequest.getTitle());
         }
+        List<ResponseStatDto> views = statClient.getViewStats(event.getCreatedOn(), LocalDateTime.now(),
+                List.of("/events/" + eventId), true);
+        event.setViews(views.size());
         Event saved = eventRepository.save(event);
         return EventMapper.toFullDto(saved);
     }
@@ -227,10 +244,10 @@ public class EventServiceImpl implements EventService {
         Event event = searchEvent(eventId);
         checkInitiator(userId, event.getInitiator().getId(),
                 "Просматривать полную информацию о событии может только его инициатор");
-        List<String> views = event.getViews();
-        if (!views.contains(httpServletRequest.getRemoteAddr())) {
-            views.add(httpServletRequest.getRemoteAddr());
-        }
+
+        List<ResponseStatDto> views = statClient.getViewStats(event.getCreatedOn(), LocalDateTime.now(),
+                List.of("/events/" + eventId), true);
+        event.setViews(views.size());
         Event saved = eventRepository.save(event);
         return EventMapper.toFullDto(saved);
     }
@@ -277,6 +294,9 @@ public class EventServiceImpl implements EventService {
         if (updateRequest.getTitle() != null && !updateRequest.getTitle().isBlank()) {
             event.setTitle(updateRequest.getTitle());
         }
+        List<ResponseStatDto> views = statClient.getViewStats(event.getCreatedOn(), LocalDateTime.now(),
+                List.of("/events/" + eventId), true);
+        event.setViews(views.size());
 
         Event saved = eventRepository.save(event);
         return EventMapper.toFullDto(saved);

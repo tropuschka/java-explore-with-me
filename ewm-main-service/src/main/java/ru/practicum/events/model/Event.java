@@ -39,10 +39,7 @@ public class Event {
     private boolean paid;
     @Column(name = "title", nullable = false)
     private String title;
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "views", joinColumns = @JoinColumn(name = "event_id"))
-    @Column(name = "ip")
-    private List<String> views;
+    private int views;
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "participation", joinColumns = @JoinColumn(name = "event_id"),
             inverseJoinColumns = @JoinColumn(name = "id"))
@@ -67,9 +64,5 @@ public class Event {
         Set<Request> approved = requests.stream()
                 .filter(r -> r.getStatus().equals(EventRequestStatus.CONFIRMED)).collect(Collectors.toSet());
         return approved.size();
-    }
-
-    public int getViewsAmount() {
-        return views.size();
     }
 }
