@@ -39,7 +39,7 @@ public class Event {
     private boolean paid;
     @Column(name = "title", nullable = false)
     private String title;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "views", joinColumns = @JoinColumn(name = "event_id"))
     @Column(name = "ip")
     private List<String> views;
