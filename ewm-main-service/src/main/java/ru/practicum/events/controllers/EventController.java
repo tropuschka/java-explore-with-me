@@ -6,6 +6,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.events.dto.EventFullDto;
 import ru.practicum.events.dto.EventShortDto;
+import ru.practicum.events.dto.SearchDto;
 import ru.practicum.events.service.EventService;
 
 import java.util.List;
@@ -32,8 +33,8 @@ public class EventController {
                                                       @RequestParam(defaultValue = "0") int from,
                                                       @RequestParam(defaultValue = "10") int size,
                                                       HttpServletRequest httpServletRequest) {
-        return eventService.search(text, categories, paid, rangeStart, rangeEnd, onlyAvailable,
-                sort, from, size, httpServletRequest);
+        return eventService.search(new SearchDto(text, categories, paid, rangeStart, rangeEnd,
+                onlyAvailable, sort, from, size), httpServletRequest);
     }
 
     @GetMapping("/{eventId}")

@@ -36,7 +36,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 import static ru.practicum.events.model.Event.timeFormat;
 
@@ -52,30 +51,29 @@ public class EventServiceImpl implements EventService {
     private final StatClient statClient;
 
     @Override
-    public List<EventShortDto> search(String text, List<Long> categories, Boolean paid, String rangeStart,
-                                      String rangeEnd, boolean onlyAvailable, String sort, int from, int size,
+    public List<EventShortDto> search(SearchDto searchDto,
                                       HttpServletRequest httpServletRequest) {
-        List<Event> events = search(rangeStart, rangeEnd);
+        List<Event> events = search(searchDto.getRangeStart(), searchDto.getRangeEnd());
 
         // Вероятно, все эти проверки можно было засунуть в репозиторий,
         // но, думаю, вышло бы больше методов, чем если использовать много стримов ㅠㅠ
-        if (text != null && !text.isBlank()) {
-            text = text.toLowerCase();
+        if (searchDto.getText() != null && !searchDto.getText().isBlank()) {
+            String text = searchDto.getText().toLowerCase();
             String finalText = text;
             events = events.stream().filter(e -> e.getAnnotation().toLowerCase().contains(finalText)
                             || e.getTitle().toLowerCase().contains(finalText)
                             || e.getDescription().toLowerCase().contains(finalText))
                     .toList();
         }
-        if (categories != null && !categories.isEmpty()) {
-            events = filterCategories(events, categories);
+        if (searchDto.getCategories() != null && !searchDto.getCategories().isEmpty()) {
+            events = filterCategories(events, searchDto.getCategories());
         }
-        if (paid != null) {
+        if (searchDto.getPaid() != null) {
             events = events.stream()
-                    .filter(e -> e.isPaid() == paid)
+                    .filter(e -> e.isPaid() == searchDto.getPaid())
                     .toList();
         }
-        if (onlyAvailable) {
+        if (searchDto.getOnlyAvailable()) {
             events = events.stream()
                     .filter(e -> e.getParticipantAmount() < e.getParticipantLimit())
                     .toList();
@@ -83,7 +81,7 @@ public class EventServiceImpl implements EventService {
 
         EventSort sortEnum;
         try {
-            sortEnum = EventSort.valueOf(sort.toUpperCase());
+            sortEnum = EventSort.valueOf(searchDto.getSort().toUpperCase());
         } catch (Exception e) {
             throw new BadRequestException("Некорректная сортировка. " +
                     "События можно сортировать по дате или по количеству просмотров");
@@ -104,7 +102,7 @@ public class EventServiceImpl implements EventService {
 
         List<EventShortDto> searchList = new ArrayList<>();
         if (!events.isEmpty()) {
-            for (int i = from; i < from + size && i < events.size(); i++) {
+            for (int i = searchDto.getFrom(); i < searchDto.getFrom() + searchDto.getSize() && i < events.size(); i++) {
                 searchList.add(EventMapper.toShortDto(events.get(i)));
             }
         }
@@ -128,28 +126,28 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventFullDto> adminSearch(List<Long> users, List<String> states, List<Long> categories,
-                                          String rangeStart, String rangeEnd, int from, int size) {
-        List<Event> events = search(rangeStart, rangeEnd);
+    public List<EventFullDto> adminSearch(SearchDto searchDto) {
+        List<Event> events = search(searchDto.getRangeStart(), searchDto.getRangeEnd());
 
-        if (users != null && !users.isEmpty()) {
+        if (searchDto.getUsers() != null && !searchDto.getUsers().isEmpty()) {
             events = events.stream()
-                    .filter(e -> users.contains(e.getInitiator().getId()))
+                    .filter(e -> searchDto.getUsers().contains(e.getInitiator().getId()))
                     .toList();
         }
-        if (states != null && !states.isEmpty()) {
-            List<EventState> statesEnum = states.stream().map(String::toUpperCase).map(EventState::valueOf).toList();
+        if (searchDto.getStates() != null && !searchDto.getStates().isEmpty()) {
+            List<EventState> statesEnum = searchDto.getStates().stream()
+                    .map(String::toUpperCase).map(EventState::valueOf).toList();
             events = events.stream()
                     .filter(e -> statesEnum.contains(e.getState()))
                     .toList();
         }
-        if (categories != null && !categories.isEmpty()) {
-            events = filterCategories(events, categories);
+        if (searchDto.getCategories() != null && !searchDto.getCategories().isEmpty()) {
+            events = filterCategories(events, searchDto.getCategories());
         }
 
         List<EventFullDto> searchList = new ArrayList<>();
         if (!events.isEmpty()) {
-            for (int i = from; i < from + size && i < events.size(); i++) {
+            for (int i = searchDto.getFrom(); i < searchDto.getFrom() + searchDto.getSize() && i < events.size(); i++) {
                 searchList.add(EventMapper.toFullDto(events.get(i)));
             }
         }

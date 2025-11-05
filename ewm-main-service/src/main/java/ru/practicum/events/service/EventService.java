@@ -9,14 +9,11 @@ import ru.practicum.events.dto.participation.ParticipationRequestDto;
 import java.util.List;
 
 public interface EventService {
-    List<EventShortDto> search(String text, List<Long> categories, Boolean paid, String rangeStart, String rangeEnd,
-                               boolean onlyAvailable, String sort, int from, int size,
-                               HttpServletRequest hHttpServletRequest);
+    List<EventShortDto> search(SearchDto searchDto, HttpServletRequest hHttpServletRequest);
 
     EventFullDto getEvent(Long eventId, HttpServletRequest httpServletRequest);
 
-    List<EventFullDto> adminSearch(List<Long> users, List<String> states, List<Long> categories,
-                                   String rangeStart, String rangeEnd, int from, int size);
+    List<EventFullDto> adminSearch(SearchDto searchDto);
 
     EventFullDto adminEventUpdate(Long eventId, UpdateEventAdminRequest eventAdminRequest);
 

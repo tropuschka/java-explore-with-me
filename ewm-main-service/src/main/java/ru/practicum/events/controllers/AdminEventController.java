@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.events.dto.EventFullDto;
+import ru.practicum.events.dto.SearchDto;
 import ru.practicum.events.dto.UpdateEventAdminRequest;
 import ru.practicum.events.service.EventService;
 
@@ -29,7 +30,7 @@ public class AdminEventController {
                                                      @RequestParam(required = false) String rangeEnd,
                                                      @RequestParam(defaultValue = "0") int from,
                                                      @RequestParam(defaultValue = "10") int size) {
-        return eventService.adminSearch(users, states, categories, rangeStart, rangeEnd, from, size);
+        return eventService.adminSearch(new SearchDto(users, states, categories, rangeStart, rangeEnd, from, size));
     }
 
     @PatchMapping("/{eventId}")
