@@ -332,9 +332,8 @@ public class EventServiceImpl implements EventService {
     }
 
     private Event searchEvent(Long eventId) {
-        Optional<Event> event = eventRepository.findById(eventId);
-        if (event.isEmpty()) throw new NotFoundException("Событие с ID " + eventId + " не найдено");
-        return event.get();
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Событие с ID " + eventId + " не найдено"));
     }
 
     private List<Event> search(String rangeStart, String rangeEnd) {
@@ -362,15 +361,13 @@ public class EventServiceImpl implements EventService {
     }
 
     private Category searchCategory(Long categoryId) {
-        Optional<Category> category = categoryRepository.findById(categoryId);
-        if (category.isEmpty()) throw new NotFoundException("Категория с ID " + categoryId + " не найдена");
-        return category.get();
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new NotFoundException("Категория с ID " + categoryId + " не найдена"));
     }
 
     private User checkUser(Long userId) {
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty()) throw new NotFoundException("Пользователь с ID " + userId + " не найден");
-        return user.get();
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с ID " + userId + " не найден"));
     }
 
     private void checkInitiator(Long userId, Long initiatorId, String msg) {
@@ -398,8 +395,8 @@ public class EventServiceImpl implements EventService {
 
     // Пока, если локация не существует, просто добавляется новая
     private Location checkLocation(LocationDto locationDto) {
-        Optional<Location> location = locationRepository.findByLatAndLon(locationDto.getLat(), locationDto.getLon());
-        return location.orElseGet(() -> locationRepository.save(EventMapper.toLocation(locationDto)));
+        return locationRepository.findByLatAndLon(locationDto.getLat(), locationDto.getLon())
+                .orElseGet(() -> locationRepository.save(EventMapper.toLocation(locationDto)));
     }
 
     private List<Event> filterCategories(List<Event> events, List<Long> categories) {

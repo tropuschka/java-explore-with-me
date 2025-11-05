@@ -72,9 +72,8 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private Event checkEvent(Long eventId) {
-        Optional<Event> optEvent = eventRepository.findById(eventId);
-        if (optEvent.isEmpty()) throw new NotFoundException("Событие с ID " + eventId + " не найдено");
-        Event event = optEvent.get();
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Событие с ID " + eventId + " не найдено"));
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new ConflictException("Событие с ID " + eventId + " недоступно");
         }
@@ -89,9 +88,8 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private Request checkRequest(Long requestId) {
-        Optional<Request> request = requestRepository.findById(requestId);
-        if (request.isEmpty()) throw new NotFoundException("Запрос с ID " + requestId + " не найден");
-        return request.get();
+        return requestRepository.findById(requestId)
+                .orElseThrow(() -> new NotFoundException("Запрос с ID " + requestId + " не найден"));
     }
 
     private void checkInitiator(Long userId, Event event) {

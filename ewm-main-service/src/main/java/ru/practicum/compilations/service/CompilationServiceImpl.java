@@ -75,9 +75,8 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     private Compilation findCompilation(Long id) {
-        Optional<Compilation> check = compilationRepository.findById(id);
-        if (check.isPresent()) return check.get();
-        else throw new NotFoundException("Подборка с ID " + id + " не найдена");
+        return compilationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Подборка с ID " + id + " не найдена"));
     }
 
     private List<Event> checkEvents(Set<Long> events) {

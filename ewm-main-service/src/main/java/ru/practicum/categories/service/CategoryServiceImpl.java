@@ -74,8 +74,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     private Category checkCategory(Long catId) {
-        Optional<Category> categoryOpt = categoryRepository.findById(catId);
-        if (categoryOpt.isEmpty()) throw new NotFoundException("Категория не найдена");
-        return categoryOpt.get();
+        return categoryRepository.findById(catId)
+                .orElseThrow(() -> new NotFoundException("Категория не найдена"));
     }
 }
