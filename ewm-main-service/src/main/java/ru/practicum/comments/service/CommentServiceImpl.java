@@ -54,6 +54,14 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.delete(comment);
     }
 
+    @Override
+    public CommentReturnDto getUserCommentById(Long userId, Long commentId) {
+        checkUser(userId);
+        Comment comment = checkComment(commentId);
+        checkAuthor(userId, comment, "Просматривать отдельный комментарий может только его автор или администратор");
+        return CommentMapper.toReturnDto(comment);
+    }
+
     private User checkUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с ID " + userId + " не найден"));

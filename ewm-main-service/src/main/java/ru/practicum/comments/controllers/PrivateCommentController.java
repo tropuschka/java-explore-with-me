@@ -40,4 +40,9 @@ public class PrivateCommentController {
     public void deleteComment(@RequestParam Long userId, @RequestParam Long commentId) {
         commentService.deleteComment(userId, commentId);
     }
+
+    @GetMapping("/{commentId}")
+    public CommentReturnDto getUserComment(@RequestParam Long userId, @RequestParam Long commentId) {
+        return commentService.getUserCommentById(userId, commentId);
+    }
 }
