@@ -7,174 +7,14 @@
 	},
 	"item": [
 		{
-			"name": "Создание нового пользователя",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"\r",
-							"pm.test(\"Ответ должен содержать код статуса 201 и данные в формате json\", function () {\r",
-							"    pm.response.to.have.status(201);\r",
-							"    pm.response.to.be.withBody;\r",
-							"    pm.response.to.be.json;\r",
-							"});"
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Accept",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"email\": \"cool@mail.ru\",\r\n    \"name\": \"Mark\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8080/admin/users",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"admin",
-						"users"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Создание новой категории",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"\r",
-							"pm.test(\"Ответ должен содержать код статуса 201 и данные в формате json\", function () {\r",
-							"    pm.response.to.have.status(201);\r",
-							"    pm.response.to.be.withBody;\r",
-							"    pm.response.to.be.json;\r",
-							"});"
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Accept",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"name\": \"Mark\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8080/admin/categories",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"admin",
-						"categories"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Создание нового события",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"\r",
-							"pm.test(\"Ответ должен содержать код статуса 201 и данные в формате json\", function () {\r",
-							"    pm.response.to.have.status(201);\r",
-							"    pm.response.to.be.withBody;\r",
-							"    pm.response.to.be.json;\r",
-							"});"
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Accept",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"annotation\": \"Однажды в студеную зимнюю пору я из лесу вышел\",\r\n    \"category\": 1,\r\n    \"description\": \"Однажды в студеную зимнюю пору я из лесу вышел\",\r\n    \"eventDate\": \"2026-01-03 11:15:00\",\r\n    \"location\": {\r\n        \"lat\": 50,\r\n        \"lon\":25\r\n    },\r\n    \"paid\": false,\r\n    \"participantLimit\": 50,\r\n    \"requestModeration\": false,\r\n    \"title\": \"Событие\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8080/users/1/events",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"users",
-						"1",
-						"events"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Создание комментария у неопубликованного события",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Ответ должен содержать код статуса 400 и данные в формате json\", function () {\r",
-							"    pm.response.to.have.status(400);  \r",
+							"pm.test(\"Ответ должен содержать код статуса 409 и данные в формате json\", function () {\r",
+							"    pm.response.to.have.status(409);  \r",
 							"    pm.response.to.be.withBody;\r",
 							"    pm.response.to.be.json;\r",
 							"});"
@@ -213,60 +53,6 @@
 					"path": [
 						"1",
 						"comments",
-						"1"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Публикация события",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"\r",
-							"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
-							"    pm.response.to.have.status(200);\r",
-							"    pm.response.to.be.withBody;\r",
-							"    pm.response.to.be.json;\r",
-							"});"
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"method": "PATCH",
-				"header": [
-					{
-						"key": "Accept",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"stateAction\": \"PUBLISH_EVENT\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8080/admin/events/1",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"admin",
-						"events",
 						"1"
 					]
 				}
@@ -471,14 +257,14 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/2/comments/1",
+					"raw": "http://localhost:8080/10000000/comments/1",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"2",
+						"10000000",
 						"comments",
 						"1"
 					]
@@ -524,7 +310,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/1/comments/1",
+					"raw": "http://localhost:8080/1/comments/10000000",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -533,7 +319,7 @@
 					"path": [
 						"1",
 						"comments",
-						"1"
+						"10000000"
 					]
 				}
 			},
@@ -736,14 +522,14 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/2/comments/1",
+					"raw": "http://localhost:8080/10000000/comments/1",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"2",
+						"10000000",
 						"comments",
 						"1"
 					]
@@ -805,67 +591,14 @@
 			"response": []
 		},
 		{
-			"name": "Создание нового пользователя",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"\r",
-							"pm.test(\"Ответ должен содержать код статуса 201 и данные в формате json\", function () {\r",
-							"    pm.response.to.have.status(201);\r",
-							"    pm.response.to.be.withBody;\r",
-							"    pm.response.to.be.json;\r",
-							"});"
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Accept",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"email\": \"nice@mail.ru\",\r\n    \"name\": \"Bill\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8080/admin/users",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"admin",
-						"users"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Обновление комментария не автором",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Ответ должен содержать код статуса 409 и данные в формате json\", function () {\r",
-							"    pm.response.to.have.status(409);\r",
+							"pm.test(\"Ответ должен содержать код статуса 403 и данные в формате json\", function () {\r",
+							"    pm.response.to.have.status(403);\r",
 							"    pm.response.to.be.withBody;\r",
 							"    pm.response.to.be.json;\r",
 							"});"
@@ -1005,14 +738,14 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:8080/3/comments/1",
+					"raw": "http://localhost:8080/10000000/comments/1",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"3",
+						"10000000",
 						"comments",
 						"1"
 					]
@@ -1038,8 +771,8 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Ответ должен содержать код статуса 409 и данные в формате json\", function () {\r",
-							"    pm.response.to.have.status(409);\r",
+							"pm.test(\"Ответ должен содержать код статуса 403 и данные в формате json\", function () {\r",
+							"    pm.response.to.have.status(403);\r",
 							"    pm.response.to.be.withBody;\r",
 							"    pm.response.to.be.json;\r",
 							"});"
@@ -1181,14 +914,14 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:8080/3/comments",
+					"raw": "http://localhost:8080/10000000/comments",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"3",
+						"10000000",
 						"comments"
 					],
 					"query": [
@@ -1302,7 +1035,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:8080/admin/comments/1",
+					"raw": "http://localhost:8080/admin/comments/2",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -1311,7 +1044,7 @@
 					"path": [
 						"admin",
 						"comments",
-						"1"
+						"2"
 					]
 				}
 			},
@@ -1425,7 +1158,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:8080/admin/comments/users/3",
+					"raw": "http://localhost:8080/admin/comments/users/10000000",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -1435,7 +1168,7 @@
 						"admin",
 						"comments",
 						"users",
-						"3"
+						"10000000"
 					],
 					"query": [
 						{
@@ -1561,7 +1294,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:8080/admin/comments/events/2",
+					"raw": "http://localhost:8080/admin/comments/events/10000000",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -1571,7 +1304,7 @@
 						"admin",
 						"comments",
 						"events",
-						"2"
+						"10000000"
 					],
 					"query": [
 						{
@@ -1772,8 +1505,8 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Ответ должен содержать код статуса 409\", function () {\r",
-							"    pm.response.to.have.status(409);\r",
+							"pm.test(\"Ответ должен содержать код статуса 403\", function () {\r",
+							"    pm.response.to.have.status(403);\r",
 							"});"
 						],
 						"type": "text/javascript",
@@ -1834,14 +1567,14 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:8080/3/comments/1",
+					"raw": "http://localhost:8080/10000000/comments/1",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"3",
+						"10000000",
 						"comments",
 						"1"
 					]
