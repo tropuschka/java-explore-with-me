@@ -2,6 +2,7 @@ package ru.practicum.locations.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.locations.model.Location;
 import ru.practicum.exceptions.ConflictException;
 import ru.practicum.locations.dto.LocationDto;
@@ -18,15 +19,32 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public LocationReturnDto addLocation(LocationDto locationDto) {
-        checkLocationDuplication(locationDto);
+        checkLocationDuplication(locationDto.getLat(), locationDto.getLon(), null);
         Location location = LocationMapper.toLocation(locationDto);
         Location saved = locationRepository.save(location);
         return LocationMapper.toReturnDto(saved);
     }
 
-    private void checkLocationDuplication(LocationDto locationDto) {
-        Optional<Location> loc = locationRepository.findByLatAndLon(locationDto.getLat(), locationDto.getLon());
-        if (loc.isPresent()) throw new ConflictException("Локация с координатами (" + locationDto.getLat() + ", "
-                + locationDto.getLon() + ") уже добавлена");
+    @Override
+    public LocationReturnDto updateLocation(Long locId, LocationDto locationDto) {
+        Location location = checkLocation(locId);
+        if (locationDto.getLon() != null) location.setLon(locationDto.getLon());
+        if (locationDto.getLat() != null) location.setLat(locationDto.getLat());
+        checkLocationDuplication(location.getLat(), location.getLon(), locId);
+        Location saved = locationRepository.save(location);
+        return LocationMapper.toReturnDto(saved);
+    }
+
+    private void checkLocationDuplication(Float lat, Float lon, Long locId) {
+        Optional<Location> loc = locationRepository.findByLatAndLon(lat, lon);
+        if (loc.isPresent() && !(locId == null || locId.equals(loc.get().getId()))) {
+            throw new ConflictException("Локация с координатами (" + lat + ", "
+                    + lon + ") уже добавлена");
+        }
+    }
+
+    private Location checkLocation(Long locId) {
+        return locationRepository.findById(locId).orElseThrow(() -> new NotFoundException("Локация с ID " + locId +
+                " не найдена"));
     }
 }

@@ -5,4 +5,6 @@ import ru.practicum.locations.dto.LocationReturnDto;
 
 public interface LocationService {
     LocationReturnDto addLocation(LocationDto locationDto);
+
+    LocationReturnDto updateLocation(Long locId, LocationDto locationDto);
 }
