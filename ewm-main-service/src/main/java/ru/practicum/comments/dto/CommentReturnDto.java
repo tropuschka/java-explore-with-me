@@ -15,5 +15,4 @@ public class CommentReturnDto {
     private EventCommentDto event;
     private String text;
     private String published;
-    private String status;
 }

@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import ru.practicum.comments.status.CommentStatus;
 import ru.practicum.events.model.Event;
 import ru.practicum.users.model.User;
 
@@ -26,8 +25,6 @@ public class Comment {
     private Event event;
     @Column(name = "text")
     private String text;
-    @Column(name = "status")
-    private CommentStatus status;
     @Column(name = "published")
     private LocalDateTime published;
 }

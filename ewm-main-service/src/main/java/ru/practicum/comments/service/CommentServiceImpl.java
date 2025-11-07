@@ -7,10 +7,8 @@ import ru.practicum.comments.dto.CommentReturnDto;
 import ru.practicum.comments.mapping.CommentMapper;
 import ru.practicum.comments.model.Comment;
 import ru.practicum.comments.repository.CommentRepository;
-import ru.practicum.comments.status.CommentStatus;
 import ru.practicum.events.model.Event;
 import ru.practicum.events.repository.EventRepository;
-import ru.practicum.exceptions.ConflictException;
 import ru.practicum.exceptions.ForbiddenException;
 import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.users.model.User;
@@ -33,7 +31,6 @@ public class CommentServiceImpl implements CommentService {
         comment.setText(commentDto.getText());
         comment.setUser(user);
         comment.setEvent(event);
-        comment.setStatus(CommentStatus.PUBLISHED);
         comment.setPublished(LocalDateTime.now());
         Comment saved = commentRepository.save(comment);
         return CommentMapper.toReturnDto(saved);
@@ -43,10 +40,18 @@ public class CommentServiceImpl implements CommentService {
     public CommentReturnDto updateComment(Long userId, Long commentId, CommentDto commentDto) {
         checkUser(userId);
         Comment comment = checkComment(commentId);
-        checkAuthor(userId, comment);
+        checkAuthor(userId, comment, "Изменять комментарий может только его автор");
         comment.setText(commentDto.getText());
         Comment saved = commentRepository.save(comment);
         return CommentMapper.toReturnDto(saved);
+    }
+
+    @Override
+    public void deleteComment(Long userId, Long commentId) {
+        checkUser(userId);
+        Comment comment = checkComment(commentId);
+        checkAuthor(userId, comment, "Удалить комментарий может только его автор или администратор");
+        commentRepository.delete(comment);
     }
 
     private User checkUser(Long userId) {
@@ -60,17 +65,13 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private Comment checkComment(Long commentId) {
-        Comment comment = commentRepository.findById(commentId)
+        return commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException("Комментарий с ID " + commentId + " не найден"));
-        if (comment.getStatus().equals(CommentStatus.DELETED)) {
-            throw new ConflictException("Нельзя редактировать удаленные комментарии");
-        }
-        return comment;
     }
 
-    private void checkAuthor(Long userId, Comment comment) {
+    private void checkAuthor(Long userId, Comment comment, String text) {
         if (!userId.equals(comment.getUser().getId())) {
-            throw new ForbiddenException("Изменять комментарий может только его автор");
+            throw new ForbiddenException(text);
         }
     }
 }
