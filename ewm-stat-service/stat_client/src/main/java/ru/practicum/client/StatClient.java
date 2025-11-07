@@ -19,15 +19,12 @@ import java.util.Objects;
 
 @Component
 public class StatClient {
-
-    @Value("${stats-service.url}")
-    private String path;
+    private final String path;
     private final RestTemplate restTemplate;
     private static final String timeFormat = "yyyy-MM-dd HH:mm:ss";
-    @Value("${application.name}")
-    private String application;
 
-    public StatClient() {
+    public StatClient(@Value("${stats-service.url:http://localhost:9090}") String path) {
+        this.path = path;
         this.restTemplate = new RestTemplateBuilder()
                 .uriTemplateHandler(new DefaultUriBuilderFactory(path))
                 .requestFactory(() -> new HttpComponentsClientHttpRequestFactory())
@@ -35,9 +32,13 @@ public class StatClient {
     }
 
     public void saveStat(HttpServletRequest request) {
-        StatDto statDto = new StatDto(null, application, request.getRemoteAddr(), request.getRequestURI(),
-                LocalDateTime.now().toString());
-        restTemplate.postForLocation(path + "/hit", statDto);
+        StatDto statDto = new StatDto(null, request.getRequestURI(), request.getRequestURI(), request.getRemoteAddr(),
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern(timeFormat)));
+        try {
+            restTemplate.postForLocation(path + "/hit", statDto);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public List<ResponseStatDto> getViewStats(LocalDateTime start, LocalDateTime end,

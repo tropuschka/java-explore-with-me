@@ -2,7 +2,6 @@ package ru.practicum.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.practicum.service.StatServerService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +9,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.ResponseStatDto;
 import ru.practicum.dto.StatDto;
+import ru.practicum.service.StatServerService;
 
 import java.time.LocalDateTime;
 import java.util.List;

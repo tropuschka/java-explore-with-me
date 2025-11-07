@@ -1,7 +1,7 @@
 package ru.practicum.mapping;
 
-import ru.practicum.model.Stat;
 import ru.practicum.dto.StatDto;
+import ru.practicum.model.Stat;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
