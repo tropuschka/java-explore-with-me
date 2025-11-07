@@ -20,22 +20,22 @@ public class AdminCommentController {
 
     @DeleteMapping("/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteComment(@RequestParam Long commentId) {
+    public void deleteComment(@PathVariable Long commentId) {
         commentService.deleteCommentAdmin(commentId);
     }
 
     @GetMapping("/{commentId}")
-    public CommentReturnDto getUserComment(@RequestParam Long commentId) {
+    public CommentReturnDto getUserComment(@PathVariable Long commentId) {
         return commentService.getCommentByIdAdmin(commentId);
     }
 
     @GetMapping("/users/{userId}")
-    public List<CommentReturnDto> getAllUserComments(@RequestParam Long userId) {
+    public List<CommentReturnDto> getAllUserComments(@PathVariable Long userId) {
         return commentService.getUserCommentsAll(userId);
     }
 
     @GetMapping("/events/{eventId}")
-    public List<CommentReturnDto> getAllEventComments(@RequestParam Long eventId) {
+    public List<CommentReturnDto> getAllEventComments(@PathVariable Long eventId) {
         return commentService.getAllEventComments(eventId);
     }
 }

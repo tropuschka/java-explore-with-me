@@ -25,31 +25,31 @@ public class PrivateCommentController {
     @PostMapping("/{eventId}")
     @Validated
     @ResponseStatus(HttpStatus.CREATED)
-    public CommentReturnDto addComment(@RequestParam Long userId, @RequestParam Long eventId,
+    public CommentReturnDto addComment(@PathVariable Long userId, @PathVariable Long eventId,
                                        @Valid @RequestBody CommentDto comment) {
         return commentService.addComment(userId, eventId, comment);
     }
 
     @PatchMapping("/{commentId}")
     @Validated
-    public CommentReturnDto updateComment(@RequestParam Long userId, @RequestParam Long commentId,
+    public CommentReturnDto updateComment(@PathVariable Long userId, @PathVariable Long commentId,
                                           @Valid @RequestBody CommentDto commentDto) {
         return commentService.updateComment(userId, commentId, commentDto);
     }
 
     @DeleteMapping("/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteComment(@RequestParam Long userId, @RequestParam Long commentId) {
+    public void deleteComment(@PathVariable Long userId, @PathVariable Long commentId) {
         commentService.deleteComment(userId, commentId);
     }
 
     @GetMapping("/{commentId}")
-    public CommentReturnDto getUserComment(@RequestParam Long userId, @RequestParam Long commentId) {
+    public CommentReturnDto getUserComment(@PathVariable Long userId, @PathVariable Long commentId) {
         return commentService.getUserCommentById(userId, commentId);
     }
 
     @GetMapping
-    public List<CommentReturnDto> getAllUserComments(@RequestParam Long userId) {
+    public List<CommentReturnDto> getAllUserComments(@PathVariable Long userId) {
         return commentService.getUserCommentsAll(userId);
     }
 }

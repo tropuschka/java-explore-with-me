@@ -1,10 +1,7 @@
 package ru.practicum.comments.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.practicum.comments.dto.CommentReturnDto;
 import ru.practicum.comments.service.CommentService;
 
@@ -21,7 +18,7 @@ public class CommentController {
     }
 
     @GetMapping
-    public List<CommentReturnDto> getEventComments(@RequestParam Long eventId) {
+    public List<CommentReturnDto> getEventComments(@PathVariable Long eventId) {
         return commentService.getAllEventComments(eventId);
     }
 }
