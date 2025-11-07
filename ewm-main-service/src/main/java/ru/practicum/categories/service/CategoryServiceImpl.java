@@ -1,6 +1,5 @@
 package ru.practicum.categories.service;
 
-import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -43,12 +42,11 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto addCategory(NewCategoryDto newCategoryDto) {
         Category category = CategoryMapper.toCategory(newCategoryDto);
-        Category saved;
-        try {
-            saved = categoryRepository.save(category);
-        } catch (ConstraintViolationException e) {
+        Optional<Category> checkUniqueName = categoryRepository.findByName(category.getName());
+        if (checkUniqueName.isPresent()) {
             throw new ConflictException("Категория \"" + category.getName() + "\" уже добавлена");
         }
+        Category saved = categoryRepository.save(category);
         return CategoryMapper.toDto(saved);
     }
 
@@ -64,14 +62,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto updateCategory(Long catId, NewCategoryDto newCategoryDto) {
+        Optional<Category> checkUnique = categoryRepository.findByName(newCategoryDto.getName());
+        if (checkUnique.isPresent() && !checkUnique.get().getId().equals(catId)) {
+            throw new ConflictException("Категория \"" + newCategoryDto.getName() + "\" уже добавлена");
+        }
+
         Category category = checkCategory(catId);
         category.setName(newCategoryDto.getName());
-        Category saved;
-        try {
-            saved = categoryRepository.save(category);
-        } catch (ConstraintViolationException e) {
-            throw new ConflictException("Категория \"" + category.getName() + "\" уже добавлена");
-        }
+        Category saved = categoryRepository.save(category);
         return CategoryMapper.toDto(saved);
     }
 
