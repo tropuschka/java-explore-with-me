@@ -16,10 +16,10 @@ import ru.practicum.events.dto.participation.ParticipationRequestDto;
 import ru.practicum.events.mapping.EventMapper;
 import ru.practicum.events.mapping.RequestMapper;
 import ru.practicum.events.model.Event;
-import ru.practicum.events.model.Location;
+import ru.practicum.locations.model.Location;
 import ru.practicum.events.model.Request;
 import ru.practicum.events.repository.EventRepository;
-import ru.practicum.events.repository.LocationRepository;
+import ru.practicum.locations.repository.LocationRepository;
 import ru.practicum.events.repository.RequestRepository;
 import ru.practicum.events.status.EventRequestStatus;
 import ru.practicum.events.status.EventSort;
@@ -29,6 +29,7 @@ import ru.practicum.exceptions.BadRequestException;
 import ru.practicum.exceptions.ConflictException;
 import ru.practicum.exceptions.ForbiddenException;
 import ru.practicum.exceptions.NotFoundException;
+import ru.practicum.locations.dto.LocationDto;
 import ru.practicum.users.model.User;
 import ru.practicum.users.repository.UserRepository;
 
@@ -404,10 +405,10 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    // Пока, если локация не существует, просто добавляется новая
     private Location checkLocation(LocationDto locationDto) {
         return locationRepository.findByLatAndLon(locationDto.getLat(), locationDto.getLon())
-                .orElseGet(() -> locationRepository.save(EventMapper.toLocation(locationDto)));
+                .orElseThrow(() -> new NotFoundException("Локация с координатами (" + locationDto.getLat() +
+                        ", " + locationDto.getLon() + ") не найдена"));
     }
 
     private List<Event> filterCategories(List<Event> events, List<Long> categories) {

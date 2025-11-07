@@ -3,11 +3,11 @@ package ru.practicum.events.mapping;
 import ru.practicum.categories.mapping.CategoryMapper;
 import ru.practicum.events.dto.EventFullDto;
 import ru.practicum.events.dto.EventShortDto;
-import ru.practicum.events.dto.LocationDto;
 import ru.practicum.events.dto.NewEventDto;
 import ru.practicum.events.model.Event;
-import ru.practicum.events.model.Location;
+import ru.practicum.locations.model.Location;
 import ru.practicum.events.status.EventState;
+import ru.practicum.locations.mapping.LocationMapper;
 import ru.practicum.users.mapping.UserMapper;
 
 import java.time.LocalDateTime;
@@ -32,13 +32,9 @@ public class EventMapper {
         return new EventFullDto(event.getAnnotation(), CategoryMapper.toDto(event.getCategory()),
                 event.getParticipantAmount(), event.getCreatedOn().format(formatter), event.getDescription(),
                 event.getEventDate().format(formatter), event.getId(), UserMapper.toShortDto(event.getInitiator()),
-                toLocationDto(event.getLocation()), event.isPaid(), event.getParticipantLimit(),
+                LocationMapper.toLocationDto(event.getLocation()), event.isPaid(), event.getParticipantLimit(),
                 publ, event.isRequestModeration(), event.getState().toString(),
                 event.getTitle(), 0);
-    }
-
-    public static Location toLocation(LocationDto locationDto) {
-        return new Location(null, locationDto.getLat(), locationDto.getLon());
     }
 
     public static Event toEvent(NewEventDto newEventDto, Location location) {
@@ -49,9 +45,5 @@ public class EventMapper {
                 newEventDto.getTitle(), new HashSet<>(), null,
                 newEventDto.getParticipantLimit(), newEventDto.getRequestModeration(), newEventDto.getDescription(),
                 LocalDateTime.now(), location, EventState.PENDING);
-    }
-
-    private static LocationDto toLocationDto(Location location) {
-        return new LocationDto(location.getLat(), location.getLon());
     }
 }
