@@ -2,6 +2,8 @@ package ru.practicum.locations.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.events.model.Event;
+import ru.practicum.events.repository.EventRepository;
 import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.locations.model.Location;
 import ru.practicum.exceptions.ConflictException;
@@ -10,12 +12,14 @@ import ru.practicum.locations.dto.LocationReturnDto;
 import ru.practicum.locations.mapping.LocationMapper;
 import ru.practicum.locations.repository.LocationRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class LocationServiceImpl implements LocationService {
     private final LocationRepository locationRepository;
+    private final EventRepository eventRepository;
 
     @Override
     public LocationReturnDto addLocation(LocationDto locationDto) {
@@ -33,6 +37,16 @@ public class LocationServiceImpl implements LocationService {
         checkLocationDuplication(location.getLat(), location.getLon(), locId);
         Location saved = locationRepository.save(location);
         return LocationMapper.toReturnDto(saved);
+    }
+
+    @Override
+    public void deleteLocation(Long locId) {
+        Location location = checkLocation(locId);
+        List<Event> locEvents = eventRepository.findByLocationId(locId);
+        if (!locEvents.isEmpty()) {
+            throw new ConflictException("Нельзя удалить локацию, в которой есть события");
+        }
+        locationRepository.delete(location);
     }
 
     private void checkLocationDuplication(Float lat, Float lon, Long locId) {

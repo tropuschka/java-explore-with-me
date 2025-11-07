@@ -7,4 +7,6 @@ public interface LocationService {
     LocationReturnDto addLocation(LocationDto locationDto);
 
     LocationReturnDto updateLocation(Long locId, LocationDto locationDto);
+
+    void deleteLocation(Long locId);
 }

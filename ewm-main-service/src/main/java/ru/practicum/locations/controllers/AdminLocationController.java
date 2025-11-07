@@ -29,4 +29,10 @@ public class AdminLocationController {
     public LocationReturnDto updateLocation(@PathVariable Long locId, @RequestBody LocationDto locationDto) {
         return locationService.updateLocation(locId, locationDto);
     }
+
+    @DeleteMapping("/{locId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteLocation(@PathVariable Long locId) {
+        locationService.deleteLocation(locId);
+    }
 }
