@@ -17,14 +17,16 @@ import java.time.LocalDateTime;
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "id", nullable = false)
     private Long id;
-    @Column(name = "user_id")
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
-    @Column(name = "event_id")
+    @ManyToOne
+    @JoinColumn(name = "event_id", nullable = false)
     private Event event;
-    @Column(name = "text")
+    @Column(name = "text", nullable = false)
     private String text;
-    @Column(name = "published")
+    @Column(name = "published", nullable = false)
     private LocalDateTime published;
 }

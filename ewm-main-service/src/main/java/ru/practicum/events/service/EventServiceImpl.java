@@ -404,7 +404,6 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    // Пока, если локация не существует, просто добавляется новая
     private Location checkLocation(LocationDto locationDto) {
         return locationRepository.findByLatAndLon(locationDto.getLat(), locationDto.getLon())
                 .orElseGet(() -> locationRepository.save(EventMapper.toLocation(locationDto)));

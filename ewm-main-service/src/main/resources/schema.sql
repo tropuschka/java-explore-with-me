@@ -68,6 +68,6 @@ CREATE TABLE IF NOT EXISTS comments (
     user_id BIGINT NOT NULL REFERENCES users(id),
     event_id BIGINT NOT NULL REFERENCES event(id),
     text text not null,
-    published timestamp without time zone,
+    published timestamp without time zone not null,
     CONSTRAINT pk_comments PRIMARY KEY (id)
 );
