@@ -19,4 +19,6 @@ public interface CommentService {
     void deleteCommentAdmin(Long commentId);
 
     CommentReturnDto getCommentByIdAdmin(Long commentId);
+
+    List<CommentReturnDto> getAllEventComments(Long eventId);
 }

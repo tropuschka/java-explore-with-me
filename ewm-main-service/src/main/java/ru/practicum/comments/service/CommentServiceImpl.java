@@ -82,6 +82,13 @@ public class CommentServiceImpl implements CommentService {
         return CommentMapper.toReturnDto(comment);
     }
 
+    @Override
+    public List<CommentReturnDto> getAllEventComments(Long eventId) {
+        checkEvent(eventId);
+        List<Comment> comments = commentRepository.findByEventId(eventId);
+        return comments.stream().map(CommentMapper::toReturnDto).toList();
+    }
+
     private User checkUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с ID " + userId + " не найден"));

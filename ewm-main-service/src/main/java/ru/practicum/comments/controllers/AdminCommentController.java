@@ -33,4 +33,9 @@ public class AdminCommentController {
     public List<CommentReturnDto> getAllUserComments(@RequestParam Long userId) {
         return commentService.getUserCommentsAll(userId);
     }
+
+    @GetMapping("/events/{eventId}")
+    public List<CommentReturnDto> getAllEventComments(@RequestParam Long eventId) {
+        return commentService.getAllEventComments(eventId);
+    }
 }
