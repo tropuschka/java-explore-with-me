@@ -25,4 +25,11 @@ public class PrivateCommentController {
                                        @Valid @RequestBody CommentDto comment) {
         return commentService.addComment(userId, eventId, comment);
     }
+
+    @PatchMapping("/{commentId}")
+    @Validated
+    public CommentReturnDto updateComment(@RequestParam Long userId, @RequestParam Long commentId,
+                                          @Valid @RequestBody CommentDto commentDto) {
+        return commentService.updateComment(userId, commentId, commentDto);
+    }
 }
