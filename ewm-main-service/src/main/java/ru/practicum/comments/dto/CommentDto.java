@@ -11,6 +11,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CommentDto {
     @NotBlank(message = "Комментарий не может быть пустым")
-    @Size(min = 1, max = 2000, message = "Длина комментария должна быть от {min} до {max} символов")
+    @Size(max = 2000, message = "Длина комментария должна быть не более {max} символов")
     private String text;
 }

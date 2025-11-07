@@ -9,6 +9,8 @@ import ru.practicum.comments.model.Comment;
 import ru.practicum.comments.repository.CommentRepository;
 import ru.practicum.events.model.Event;
 import ru.practicum.events.repository.EventRepository;
+import ru.practicum.events.status.EventState;
+import ru.practicum.exceptions.ConflictException;
 import ru.practicum.exceptions.ForbiddenException;
 import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.users.model.User;
@@ -95,8 +97,12 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private Event checkEvent(Long eventId) {
-        return eventRepository.findById(eventId)
+        Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Событие с ID " + eventId + " не найдено"));
+        if (!event.getState().equals(EventState.PUBLISHED)) {
+            throw new ConflictException("Комментарии можно оставлять только к опубликованным событиям");
+        }
+        return event;
     }
 
     private Comment checkComment(Long commentId) {
