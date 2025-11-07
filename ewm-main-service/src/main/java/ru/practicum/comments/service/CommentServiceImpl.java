@@ -15,6 +15,7 @@ import ru.practicum.users.model.User;
 import ru.practicum.users.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -60,6 +61,13 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = checkComment(commentId);
         checkAuthor(userId, comment, "Просматривать отдельный комментарий может только его автор или администратор");
         return CommentMapper.toReturnDto(comment);
+    }
+
+    @Override
+    public List<CommentReturnDto> getUserCommentsAll(Long userId) {
+        checkUser(userId);
+        List<Comment> comments = commentRepository.findByUserId(userId);
+        return comments.stream().map(CommentMapper::toReturnDto).toList();
     }
 
     private User checkUser(Long userId) {

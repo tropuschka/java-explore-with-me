@@ -9,6 +9,8 @@ import ru.practicum.comments.dto.CommentDto;
 import ru.practicum.comments.dto.CommentReturnDto;
 import ru.practicum.comments.service.CommentService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/{userId}/comments")
 @Validated
@@ -44,5 +46,10 @@ public class PrivateCommentController {
     @GetMapping("/{commentId}")
     public CommentReturnDto getUserComment(@RequestParam Long userId, @RequestParam Long commentId) {
         return commentService.getUserCommentById(userId, commentId);
+    }
+
+    @GetMapping
+    public List<CommentReturnDto> getAllUserComments(@RequestParam Long userId) {
+        return commentService.getUserCommentsAll(userId);
     }
 }
