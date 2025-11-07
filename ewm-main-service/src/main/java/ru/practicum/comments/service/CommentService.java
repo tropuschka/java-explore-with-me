@@ -15,4 +15,8 @@ public interface CommentService {
     CommentReturnDto getUserCommentById(Long userId, Long commentId);
 
     List<CommentReturnDto> getUserCommentsAll(Long userId);
+
+    void deleteCommentAdmin(Long commentId);
+
+    CommentReturnDto getCommentByIdAdmin(Long commentId);
 }

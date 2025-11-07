@@ -70,6 +70,18 @@ public class CommentServiceImpl implements CommentService {
         return comments.stream().map(CommentMapper::toReturnDto).toList();
     }
 
+    @Override
+    public void deleteCommentAdmin(Long commentId) {
+        Comment comment = checkComment(commentId);
+        commentRepository.delete(comment);
+    }
+
+    @Override
+    public CommentReturnDto getCommentByIdAdmin(Long commentId) {
+        Comment comment = checkComment(commentId);
+        return CommentMapper.toReturnDto(comment);
+    }
+
     private User checkUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с ID " + userId + " не найден"));
