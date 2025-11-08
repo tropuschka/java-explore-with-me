@@ -16,7 +16,6 @@ import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.users.model.User;
 import ru.practicum.users.repository.UserRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
