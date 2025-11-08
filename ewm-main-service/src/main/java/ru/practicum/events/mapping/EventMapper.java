@@ -31,7 +31,7 @@ public class EventMapper {
                 event.getEventDate().format(formatter), event.getId(), UserMapper.toShortDto(event.getInitiator()),
                 toLocationDto(event.getLocation()), event.isPaid(), event.getParticipantLimit(),
                 publ, event.isRequestModeration(), event.getState().toString(),
-                event.getTitle(), 0);
+                event.getTitle(), 0, 0);
     }
 
     public static Location toLocation(LocationDto locationDto) {
