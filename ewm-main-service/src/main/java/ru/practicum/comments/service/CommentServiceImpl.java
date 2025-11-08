@@ -30,11 +30,7 @@ public class CommentServiceImpl implements CommentService {
     public CommentReturnDto addComment(Long userId, Long eventId, CommentDto commentDto) {
         User user = checkUser(userId);
         Event event = checkEvent(eventId);
-        Comment comment = new Comment();
-        comment.setText(commentDto.getText());
-        comment.setUser(user);
-        comment.setEvent(event);
-        comment.setPublished(LocalDateTime.now());
+        Comment comment = CommentMapper.toComment(commentDto, user, event);
         Comment saved = commentRepository.save(comment);
         return CommentMapper.toReturnDto(saved);
     }
