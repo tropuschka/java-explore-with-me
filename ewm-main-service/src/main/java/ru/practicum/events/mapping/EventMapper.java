@@ -1,10 +1,7 @@
 package ru.practicum.events.mapping;
 
 import ru.practicum.categories.mapping.CategoryMapper;
-import ru.practicum.events.dto.EventFullDto;
-import ru.practicum.events.dto.EventShortDto;
-import ru.practicum.events.dto.LocationDto;
-import ru.practicum.events.dto.NewEventDto;
+import ru.practicum.events.dto.*;
 import ru.practicum.events.model.Event;
 import ru.practicum.events.model.Location;
 import ru.practicum.events.status.EventState;
@@ -17,7 +14,7 @@ import java.util.HashSet;
 import static ru.practicum.events.model.Event.timeFormat;
 
 public class EventMapper {
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(timeFormat);
+    public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(timeFormat);
 
     public static EventShortDto toShortDto(Event event) {
         return new EventShortDto(event.getAnnotation(), CategoryMapper.toDto(event.getCategory()),
@@ -34,7 +31,7 @@ public class EventMapper {
                 event.getEventDate().format(formatter), event.getId(), UserMapper.toShortDto(event.getInitiator()),
                 toLocationDto(event.getLocation()), event.isPaid(), event.getParticipantLimit(),
                 publ, event.isRequestModeration(), event.getState().toString(),
-                event.getTitle(), 0);
+                event.getTitle(), 0, 0);
     }
 
     public static Location toLocation(LocationDto locationDto) {
@@ -49,6 +46,12 @@ public class EventMapper {
                 newEventDto.getTitle(), new HashSet<>(), null,
                 newEventDto.getParticipantLimit(), newEventDto.getRequestModeration(), newEventDto.getDescription(),
                 LocalDateTime.now(), location, EventState.PENDING);
+    }
+
+    public static EventCommentDto toCommentDto(Event event) {
+        return new EventCommentDto(event.getAnnotation(), CategoryMapper.toDto(event.getCategory()),
+                event.getEventDate().format(formatter), event.getId(), UserMapper.toShortDto(event.getInitiator()),
+                event.isPaid(), event.getTitle());
     }
 
     private static LocationDto toLocationDto(Location location) {

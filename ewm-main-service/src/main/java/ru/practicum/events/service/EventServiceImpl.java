@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import ru.practicum.categories.model.Category;
 import ru.practicum.categories.repository.CategoryRepository;
 import ru.practicum.client.StatClient;
+import ru.practicum.comments.model.Comment;
+import ru.practicum.comments.repository.CommentRepository;
 import ru.practicum.dto.ResponseStatDto;
 import ru.practicum.events.dto.*;
 import ru.practicum.events.dto.participation.EventRequestStatusUpdateRequest;
@@ -50,6 +52,7 @@ public class EventServiceImpl implements EventService {
     private final LocationRepository locationRepository;
     private final UserRepository userRepository;
     private final RequestRepository requestRepository;
+    private final CommentRepository commentRepository;
     private final StatClient statClient;
 
     @Override
@@ -123,7 +126,7 @@ public class EventServiceImpl implements EventService {
         }
         statClient.saveStat(httpServletRequest);
         Event saved = eventRepository.save(event);
-        return toFullWithViews(saved);
+        return toFullWithViewsAndComments(saved);
     }
 
     @Override
@@ -148,21 +151,29 @@ public class EventServiceImpl implements EventService {
 
         List<EventFullDto> searchList = new ArrayList<>();
         if (!events.isEmpty()) {
-            List<String> eventIds = new ArrayList<>();
+            List<String> eventIdStrings = new ArrayList<>();
+            List<Long> eventIds = new ArrayList<>();
             for (int i = searchDto.getFrom(); i < searchDto.getFrom() + searchDto.getSize() && i < events.size(); i++) {
-                eventIds.add("/events/" + events.get(i).getId());
+                eventIdStrings.add("/events/" + events.get(i).getId());
+                eventIds.add(events.get(i).getId());
             }
             List<ResponseStatDto> views = statClient.getViewStats(
                     LocalDateTime.of(2000, Month.JANUARY, 1, 0, 0), LocalDateTime.now(),
-                    eventIds, true);
+                    eventIdStrings, true);
+            List<Comment> comments = commentRepository.findByEventIdIn(eventIds);
             for (int i = searchDto.getFrom(); i < searchDto.getFrom() + searchDto.getSize() && i < events.size(); i++) {
                 Event event = events.get(i);
                 List<ResponseStatDto> eventViews = new ArrayList<>();
                 for (ResponseStatDto responseStatDto : views) {
                     if (responseStatDto.getApp().equals("/events/" + event.getId())) eventViews.add(responseStatDto);
                 }
+                List<Comment> eventComments = new ArrayList<>();
+                for (Comment comm : comments) {
+                    if (comm.getEvent().getId().equals(event.getId())) eventComments.add(comm);
+                }
                 EventFullDto fullDto = EventMapper.toFullDto(event);
                 fullDto.setViews(eventViews.size());
+                fullDto.setComments(eventComments.size());
                 searchList.add(fullDto);
             }
         }
@@ -211,7 +222,7 @@ public class EventServiceImpl implements EventService {
             event.setTitle(updateRequest.getTitle());
         }
         Event saved = eventRepository.save(event);
-        return toFullWithViews(saved);
+        return toFullWithViewsAndComments(saved);
     }
 
     @Override
@@ -235,7 +246,7 @@ public class EventServiceImpl implements EventService {
         event.setInitiator(user);
 
         Event saved = eventRepository.save(event);
-        return toFullWithViews(saved);
+        return toFullWithViewsAndComments(saved);
     }
 
     @Override
@@ -245,7 +256,7 @@ public class EventServiceImpl implements EventService {
                 "Просматривать полную информацию о событии может только его инициатор");
 
         Event saved = eventRepository.save(event);
-        return toFullWithViews(saved);
+        return toFullWithViewsAndComments(saved);
     }
 
     @Override
@@ -292,7 +303,7 @@ public class EventServiceImpl implements EventService {
         }
 
         Event saved = eventRepository.save(event);
-        return toFullWithViews(saved);
+        return toFullWithViewsAndComments(saved);
     }
 
     @Override
@@ -404,7 +415,6 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    // Пока, если локация не существует, просто добавляется новая
     private Location checkLocation(LocationDto locationDto) {
         return locationRepository.findByLatAndLon(locationDto.getLat(), locationDto.getLon())
                 .orElseGet(() -> locationRepository.save(EventMapper.toLocation(locationDto)));
@@ -441,9 +451,10 @@ public class EventServiceImpl implements EventService {
         return views.size();
     }
 
-    private EventFullDto toFullWithViews(Event event) {
+    private EventFullDto toFullWithViewsAndComments(Event event) {
         EventFullDto fullDto = EventMapper.toFullDto(event);
         fullDto.setViews(setViews(event.getCreatedOn(), fullDto.getId()));
+        fullDto.setComments(commentRepository.findByEventId(event.getId()).size());
         return fullDto;
     }
 }
