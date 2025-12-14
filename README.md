@@ -1,5 +1,8 @@
 # java-explore-with-me
-Template repository for ExploreWithMe project.
+Веб-приложение для хранения данных о мероприятиях. Позволяет создавать, искать и просматривать мероприятия, подавать заявки на участие, оставлять комментарии и составлять подборки мероприятий. Также реализована модерация событий и комментариев.
 
+## Задачи
+Реализация бизнес-логики, настройка валидации данных, настройка и подключение базы данных, написание Postman-тестов.
 
-Feature: https://github.com/tropuschka/java-explore-with-me/pull/5#issue-3600733034
+## Технологии
+Spring Boot, REST, Maven, Lombok, PostgreSQL, Spring Data JPA, Postman.
